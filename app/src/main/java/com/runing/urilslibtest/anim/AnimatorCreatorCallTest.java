@@ -7,7 +7,7 @@ import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
-import com.runing.utilslib.anim.animatorcreator.AnimatorCreator;
+import com.runing.utilslib.anim.AnimatorCreator;
 
 public class AnimatorCreatorCallTest {
 

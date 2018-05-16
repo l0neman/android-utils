@@ -1,4 +1,4 @@
-package com.runing.utilslib.anim.animatorcreator;
+package com.runing.utilslib.anim;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
