@@ -95,7 +95,8 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
   }
 
   @Override
-  public final ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  @NonNull
+  public final ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     final int layoutId;
     if (mMultiType == null) {
       layoutId = mItemId;
@@ -130,7 +131,7 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
   }
 
   @Override
-  public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+  public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
     if (payloads.isEmpty()) {
       onBindViewHolder(holder, position);
     }
