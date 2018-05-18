@@ -1,5 +1,7 @@
 # BaseRvAdapter
 
+[源码 - BaseRvAdapter.java](./BaseRvAdapter.java)
+
 1. 精简原始 RecyclerView.Adapter 的包含 ViewHolder 在内的重复代码。
 2. 加入泛型和对 Item 子 View 的缓存，避免繁琐操作，凸显出核心逻辑。
 3. 加入 OnItemClickListener 和 OnItemLongClickListener 的支持。

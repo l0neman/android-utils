@@ -1,5 +1,7 @@
 # AnimatorCreator
 
+[源码 - AnimatorCreator.java](./AnimatorCreator.java)
+
 快速动画创建器，链式调用使得创建动画的过程更加流畅，直观。
 
 使用示例：
