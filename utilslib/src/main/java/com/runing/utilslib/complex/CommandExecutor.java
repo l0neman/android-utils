@@ -30,6 +30,10 @@ public final class CommandExecutor implements ICommandExecutor {
       return content;
     }
 
+    @Override public List<String> contentList() {
+      return lines;
+    }
+
     @Override public int exitCode() {
       return exitValue;
     }

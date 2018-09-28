@@ -5,6 +5,7 @@ import android.util.Log;
 import com.runing.utilslib.complex.CommandExecutor;
 import com.runing.utilslib.complex.ICommandExecutor;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class CommandExecutorTest {
@@ -27,6 +28,14 @@ public class CommandExecutorTest {
         ICommandExecutor.Result result = executor.read();
         Log.d(TAG, "result: " + result.content());
         Log.d(TAG, "exitCode: " + result.exitCode());
+        // 或迭代输出内容。
+        for (String line : result) {
+          Log.d(TAG, "line: " + line);
+        }
+        List<String> lines = result.contentList();
+        for (String line : lines) {
+          Log.d(TAG, "line: " + line);
+        }
       }
     }).start();
 

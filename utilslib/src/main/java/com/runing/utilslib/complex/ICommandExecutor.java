@@ -1,5 +1,7 @@
 package com.runing.utilslib.complex;
 
+import java.util.List;
+
 public interface ICommandExecutor {
 
   interface Callback {
@@ -18,6 +20,8 @@ public interface ICommandExecutor {
   interface Result extends Iterable<String> {
 
     String content();
+
+    List<String> contentList();
 
     int exitCode();
   }
