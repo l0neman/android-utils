@@ -1,4 +1,4 @@
-package com.runing.utilslib.complex;
+package com.runing.utilslib.general.simplify;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -128,10 +128,12 @@ public final class CommandExecutor implements ICommandExecutor {
 
     try {
       process.getInputStream().close();
-    } catch (IOException ignore) {}
+    }
+    catch (IOException ignore) {}
 
     try {
       process.getOutputStream().close();
-    } catch (IOException ignore) {}
+    }
+    catch (IOException ignore) {}
   }
 }

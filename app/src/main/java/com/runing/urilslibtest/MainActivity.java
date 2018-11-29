@@ -3,8 +3,6 @@ package com.runing.urilslibtest;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.runing.utilslib.complex.CommandExecutor;
-
 public class MainActivity extends AppCompatActivity {
 
   @Override

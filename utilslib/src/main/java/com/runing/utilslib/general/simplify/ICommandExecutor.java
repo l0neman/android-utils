@@ -1,4 +1,4 @@
-package com.runing.utilslib.complex;
+package com.runing.utilslib.general.simplify;
 
 import java.util.List;
 

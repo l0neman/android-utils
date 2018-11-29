@@ -1,9 +1,9 @@
-package com.runing.urilslibtest.complex;
+package com.runing.urilslibtest.general.simplify;
 
 import android.util.Log;
 
-import com.runing.utilslib.complex.CommandExecutor;
-import com.runing.utilslib.complex.ICommandExecutor;
+import com.runing.utilslib.general.simplify.CommandExecutor;
+import com.runing.utilslib.general.simplify.ICommandExecutor;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
