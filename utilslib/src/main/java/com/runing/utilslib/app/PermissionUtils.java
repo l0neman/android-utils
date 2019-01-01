@@ -80,7 +80,8 @@ public final class PermissionUtils {
 
     if (mCallBack instanceof MultiPermissionCallBack) {
       checkAndRequestMultiPermissions(activity, ignoreRationale, new String[]{permission});
-    } else {
+    }
+    else {
       checkAndRequestSinglePermission(activity, ignoreRationale, permission);
     }
   }
@@ -98,7 +99,8 @@ public final class PermissionUtils {
 
     if (mCallBack instanceof MultiPermissionCallBack) {
       checkAndRequestMultiPermissions(activity, ignoreRationale, permissions);
-    } else {
+    }
+    else {
       checkAndRequestSinglePermission(activity, ignoreRationale, permissions[0]);
     }
   }
@@ -111,7 +113,8 @@ public final class PermissionUtils {
         return;
       }
       mRequestPermissions.add(permission);
-    } else {
+    }
+    else {
       mCallBack.onGrantedPermission(permission);
     }
     if (!mRequestPermissions.isEmpty()) {
@@ -130,7 +133,8 @@ public final class PermissionUtils {
           return;
         }
         mRequestPermissions.add(permission);
-      } else {
+      }
+      else {
         mCallBack.onGrantedPermission(permission);
       }
     }
@@ -138,6 +142,9 @@ public final class PermissionUtils {
       ActivityCompat.requestPermissions(
           activity, mRequestPermissions.toArray(new String[mRequestPermissions.size()]), PERMISSION_REQUEST_CODE
       );
+    }
+    else {
+      ((MultiPermissionCallBack) mCallBack).onGrantedAll();
     }
   }
 
@@ -150,25 +157,28 @@ public final class PermissionUtils {
     }
     if (mCallBack instanceof MultiPermissionCallBack) {
       handleMultiPermissionResult(permissions, grantResults);
-    } else {
+    }
+    else {
       handleSinglePermissionResult(permissions[0], grantResults[0]);
     }
   }
 
   private void handleMultiPermissionResult(String[] permissions, int[] grantResults) {
     boolean isAllGranted = true;
-    final MultiPermissionCallBack callBack = (MultiPermissionCallBack)mCallBack;
+    final MultiPermissionCallBack callBack = (MultiPermissionCallBack) mCallBack;
     for (int i = 0; i < permissions.length; i++) {
       if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
         callBack.onGrantedPermission(permissions[i]);
-      } else {
+      }
+      else {
         isAllGranted = false;
         callBack.onDeniedPermission(permissions[i]);
       }
     }
     if (isAllGranted) {
       callBack.onGrantedAll();
-    } else {
+    }
+    else {
       callBack.onDeniedPart();
     }
   }
@@ -176,7 +186,8 @@ public final class PermissionUtils {
   private void handleSinglePermissionResult(String permission, int grantResults) {
     if (grantResults == PackageManager.PERMISSION_GRANTED) {
       mCallBack.onGrantedPermission(permission);
-    } else {
+    }
+    else {
       mCallBack.onDeniedPermission(permission);
     }
   }
