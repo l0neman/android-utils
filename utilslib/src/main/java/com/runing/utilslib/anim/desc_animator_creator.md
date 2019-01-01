@@ -6,7 +6,7 @@
 
 使用示例：
 
-## 创建 ValueAnimator 实例
+## 创建 ValueAnimator 动画
 
 ```java
 final Animator valueAnimator = AnimatorCreator.valAnim()

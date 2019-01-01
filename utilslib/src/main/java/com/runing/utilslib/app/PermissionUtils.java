@@ -140,7 +140,7 @@ public final class PermissionUtils {
     }
     if (!mRequestPermissions.isEmpty()) {
       ActivityCompat.requestPermissions(
-          activity, mRequestPermissions.toArray(new String[mRequestPermissions.size()]), PERMISSION_REQUEST_CODE
+          activity, mRequestPermissions.toArray(new String[0]), PERMISSION_REQUEST_CODE
       );
     }
     else {
