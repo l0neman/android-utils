@@ -49,7 +49,8 @@ public final class CommandExecutor implements ICommandExecutor {
         .redirectErrorStream(true);
     try {
       this.process = pb.start();
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throw new CommandException(e);
     }
   }
@@ -60,7 +61,8 @@ public final class CommandExecutor implements ICommandExecutor {
       os.write(cmd.getBytes());
       os.write("\n".getBytes());
       os.flush();
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throw new CommandException(e);
     }
   }
@@ -72,7 +74,8 @@ public final class CommandExecutor implements ICommandExecutor {
     int exitValue;
     try {
       exitValue = this.process.waitFor();
-    } catch (InterruptedException ignore) {
+    }
+    catch (InterruptedException ignore) {
       exitValue = -1;
     }
     return new Result(lines, content, exitValue);
@@ -82,14 +85,16 @@ public final class CommandExecutor implements ICommandExecutor {
     //noinspection Convert2Lambda
     final CommandExecutor ce = this;
     exec.execute(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         LinkedList<String> lines = new LinkedList<>();
         String content = getContent(lines, ce.process, callback);
 
         int exitValue;
         try {
           exitValue = ce.process.waitFor();
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
           exitValue = -1;
         }
         callback.onSuccess(new Result(lines, content, exitValue));
@@ -114,7 +119,8 @@ public final class CommandExecutor implements ICommandExecutor {
         }
       }
       return builder.toString();
-    } catch (IllegalStateException ignore) {}
+    }
+    catch (IllegalStateException ignore) {}
     return "";
   }
 

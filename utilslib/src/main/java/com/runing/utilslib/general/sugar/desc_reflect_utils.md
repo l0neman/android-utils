@@ -4,7 +4,7 @@
 
 链式包装反射工具，使用简单直接。
 
-示例：
+- 示例中的目标对象：
 
 ```java
 private static final class Target extends Base {
@@ -21,10 +21,11 @@ private static final class Target extends Base {
 }
 ```
 
-- 1-1. 操作对象的成员变量。
+## 1-1. 操作对象的成员变量
 
 ```java
-try { // set value.
+try {
+  // set value.
   ReflectUtils.inject(target)
       .field("str")
       .set("rts");
@@ -37,17 +38,19 @@ try { // set value.
 ```
 
 ```java
-try { // get value.
+try {
+  // get value.
   String str = (String) ReflectUtils.inject(target)
       .field("str")
       .get();
 } catch (Exception ignore) {}
 ```
 
-- 1-2. 操作类的静态成员变量。
+## 1-2. 操作类的静态成员变量
 
 ```java
-try { // set value.
+try {
+  // set value.
   ReflectUtils.inject(Target.class)
       .field("sInt")
       .set(2);
@@ -55,17 +58,19 @@ try { // set value.
 ```
 
 ```java
-try { // get value.
+try {
+  // get value.
   int sInt = (int) ReflectUtils.inject(Target.class)
       .field("sInt")
       .get();
 } catch (Exception ignore) {}
 ```
 
-- 2-1. 调用对象的方法。
+## 2-1. 调用对象的方法
 
 ```java
-try { // call method.
+try {
+  // call method.
   int hashCode = (int) ReflectUtils.invoke(target)
     .method("getNumber")
     .paramsType(Target.class)
@@ -73,10 +78,11 @@ try { // call method.
 } catch (Exception ignore) {}
 ```
 
-- 2-2. 调用类的静态方法。 
+## 2-2. 调用类的静态方法
 
 ```java
-try { // call static method.
+try {
+  // call static method.
   String str = (String) ReflectUtils.invoke(Target.class)
     .method("getStr")
     .invoke();

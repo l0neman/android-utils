@@ -4,7 +4,7 @@
 
 一键权限请求工具，请求单个权限或多个权限，可选择两种回调用方式。
 
-- 实现单权限回调
+## 处理单个权限
 
 ```java
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -43,7 +43,7 @@ private PermissionUtils mPermissionUtils = PermissionUtils.newInstance(
 );
 ```
 
-- 或实现多权限回调
+## 处理多个权限
 
 ```java
 private PermissionUtils getmPermissionUtils = PermissionUtils.newInstance(
@@ -70,7 +70,7 @@ private PermissionUtils getmPermissionUtils = PermissionUtils.newInstance(
     });
 ```
 
-- 接管系统权限返回结果
+## 1. 接管系统权限返回结果
 
 ```java
 @Override
@@ -82,7 +82,7 @@ public void onRequestPermissionsResult(int requestCode, @NonNull String[] permis
 }
 ```
 
-- 最后在生命周期方法里请求权限
+## 2. 在生命周期方法里请求权限
 
 ```java
 @Override protected void onCreate(@Nullable Bundle savedInstanceState) {

@@ -5,7 +5,7 @@
 1. 精简原始 BaseAdapter 的包含 ViewHolder 在内的重复代码。
 2. 加入泛型和对 Item 子 View 的缓存，避免繁琐操作，凸显出核心逻辑。
 
-- 单类型布局
+## 单类型布局
 
 ```java
 /* 单类型布局 */
@@ -25,7 +25,7 @@ BaseLvAdapter lvAdapter = new BaseLvAdapter(data, R.layout.test_item_layout) {
 listView.setAdapter(lvAdapter);
 ```
 
-- 多类型布局
+## 多类型布局
 
 ```java
 BaseLvAdapter lvAdapter2 = new BaseLvAdapter(data, new BaseLvAdapter.MultiType() {

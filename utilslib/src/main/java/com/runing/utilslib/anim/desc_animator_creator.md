@@ -6,7 +6,7 @@
 
 使用示例：
 
-- 创建 ValueAnimator 实例
+## 创建 ValueAnimator 实例
 
 ```java
 final Animator valueAnimator = AnimatorCreator.valAnim()
@@ -19,7 +19,9 @@ final Animator valueAnimator = AnimatorCreator.valAnim()
     .ofFloat(0F, 1F);
 ```
 
-- 创建 ObjectAnimator 动画有两种情况，单属性和多属性。
+## 创建 ObjectAnimator 动画
+
+创建时分两种情况，单属性和多属性。
 
 ```java
 /* 从 float 值创建单个属性的 ObjectAnimator */
@@ -37,7 +39,9 @@ final Animator objAnimator2 = AnimatorCreator.objAnim()
     .ofTypeEvaluator(new ArgbEvaluator(), 0xff00, 0xff11);
 ```
 
-- 下面是完整方法，这里只是全部列出，有些方法不能共用，以下和Animator的方法含义相同。
+## 所有方法
+
+下面是支持的所有方法，这里只是全部列出，有些方法不能共用，以下和 Animator 的方法含义相同。
 
 ```java
 AnimatorCreator.objAnim()
@@ -65,7 +69,7 @@ AnimatorCreator.objAnim()
     })
     /* 动画生命周期监听 */
     .listener(new AnimatorListenerAdapter() {
-      @Override public void onAnimationEnd(Animator animation) { }
+      @Override public void onAnimationEnd(Animator animation) {}
     })
     /* 动画过程的数值监听（updateListener 的包装） */
     .valueListener(new AnimatorCreator.ValueCallback<Integer>() {
@@ -83,5 +87,3 @@ AnimatorCreator.objAnim()
     .startDelay(1000)
     .ofFloat(0F, 1F);
 ```
-
-- 不断改善 . . .

@@ -6,7 +6,7 @@
 2. 加入泛型和对 Item 子 View 的缓存，避免繁琐操作，凸显出核心逻辑。
 3. 加入 OnItemClickListener 和 OnItemLongClickListener 的支持。
 
-- 单布局 
+## 单类型布局
 
 ```java
 BaseRvAdapter rvAdapter = new BaseRvAdapter(data, R.layout.test_item_layout) {
@@ -24,7 +24,7 @@ BaseRvAdapter rvAdapter = new BaseRvAdapter(data, R.layout.test_item_layout) {
 };
 ```
 
-- 多类型布局
+## 多类型布局
 
 ```java
 BaseRvAdapter rvAdapter2 = new BaseRvAdapter(data, new BaseRvAdapter.MultiType() {
@@ -57,7 +57,7 @@ BaseRvAdapter rvAdapter2 = new BaseRvAdapter(data, new BaseRvAdapter.MultiType()
 };
 ```
 
-- ItemClickListener
+## ItemClickListener
 
 ```java
 rvAdapter.setOnItemClickListener(new BaseRvAdapter.OnItemClickListener() {

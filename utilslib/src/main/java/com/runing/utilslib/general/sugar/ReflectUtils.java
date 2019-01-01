@@ -8,29 +8,29 @@ import java.lang.reflect.Method;
  * Reflection utils.
  * Created by runing on 2018/11/28.
  */
-public class ReflectUtils {
+public final class ReflectUtils {
 
   private Class<?> clazz;
   private Object target;
   private Injector injector = new Injector();
   private Invoker invoker = new Invoker();
-  private static ThreadLocal<ReflectUtils> sCache;
+  private static ThreadLocal<ReflectUtils> sUtilsInstance;
 
   private ReflectUtils() {}
 
   /**
-   * nothing.
+   * clean an object.
    */
   public static void recycle() {
-    sCache = null;
+    sUtilsInstance = null;
   }
 
   /* 缓存工具对象，不使用常量。 */
   private static ReflectUtils apply() {
-    if (sCache == null) {
-      sCache = new ThreadLocal<>();
+    if (sUtilsInstance == null) {
+      sUtilsInstance = new ThreadLocal<>();
     }
-    ReflectUtils reflectUtils = sCache.get();
+    ReflectUtils reflectUtils = sUtilsInstance.get();
     if (reflectUtils == null) {
       reflectUtils = new ReflectUtils();
       return reflectUtils;

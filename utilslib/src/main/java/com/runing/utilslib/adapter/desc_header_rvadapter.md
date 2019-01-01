@@ -5,7 +5,7 @@
 1. 为 RecyclerView 提供添加 HeaderView 和 FooterView 的功能。
 2. 采用包装模式，包装了原始 Adapter。
 
-- 使用
+## 用法
 
 ```java
 /* 首先创建原始 RecyclerView.Adapter（这里是用的封装的Adapter） */
@@ -32,7 +32,7 @@ recyclerView.setAdapter(headerRvAdapter);
 ```
 
 
-- 也可以直接创建使用（不推荐）
+## 也可以直接创建使用（不推荐）
 
 ```java
 /* 可以直接用 */
@@ -44,4 +44,4 @@ rvAdapter.addFooterView(new TextView(context));
 recyclerView.setAdapter(rvAdapter);
 ```
 
-- 推荐 [BaseRvAdapter](./BaseRvAdapter.java)
+## 相关 [BaseRvAdapter](./desc_base_rvadapter.md)

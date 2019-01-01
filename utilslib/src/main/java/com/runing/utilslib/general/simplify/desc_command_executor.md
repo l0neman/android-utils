@@ -1,10 +1,11 @@
 # CommandExecutor
 
-[源码 - CommandExecutor.java](./CommandExecutor.java)
+[源码 - ICommandExecutor.java](./ICommandExecutor.java) => 接口类
+[源码 - CommandExecutor.java](./CommandExecutor.java) => 实现类
 
 方便的命令执行工具，封装了 ProcessBuilder。
 
-- 执行命令，使用同步方法读取结果。
+## 执行命令同步获取结果
 
 ```java
 final ICommandExecutor executor = new CommandExecutor();
@@ -33,7 +34,7 @@ new Thread(new Runnable() {
 }).start();
 ```
 
-- 执行命令，使用异步方法读取结果。
+## 执行命令异步获取结果
 
 ```java
 try {
@@ -55,7 +56,9 @@ executor.readAsync(new ICommandExecutor.Callback() {
 });
 ```
 
-- 执行命令，并在子进程中写入更多命令，并手动停止。
+## 执行命令并在子进程中写入更多命令
+
+写入命令后手动停止。
 
 ```java
 try {
