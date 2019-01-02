@@ -219,3 +219,24 @@ catch (HttpUtils.HttpException e) {
   // 请求出错。
 }
 ```
+
+## Cache
+
+在每次请求时可设置缓存时间（前提是已经在构建 HttpUtils 对象时设置了缓存文件和大小）。
+
+```java
+httpUtils.cache(10);
+...
+```
+
+获取缓存设置。
+
+```java
+HttpUtils.Cache cache = httpUtils.cache();
+// 设置的缓存目录。
+cache.cacheDir();
+// 当前缓存大小。
+cache.cacheSize();
+// 清理缓存。
+cache.clear();
+```
