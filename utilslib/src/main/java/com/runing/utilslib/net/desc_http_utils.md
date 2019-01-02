@@ -6,7 +6,7 @@
 
 简单封装的 HTTP 请求工具，根据需求进一步扩展功能。
 
-## 构建 HttpUtils 对象。
+## 构建 HttpUtils 对象
 
 ```java
 HttpUtils httpUtils = new OkHttpUtils.Builder()
@@ -137,6 +137,7 @@ post 方法也都包含异步方法，和 get 形式相同，以下示例不再�
 // 1. 直接使用 json 字符串的形式。
 try {
   final HttpUtils.Task task = httpUtils.url("http://www.example.com/postJson")
+      // 指定 json 类型 [application/json]。
       .json()
       .params("{\"name\":\"test\",\"gender\":\"boy\"}")
       .post();
@@ -182,6 +183,7 @@ catch (HttpUtils.HttpException ignore) {}
 ```java
 try {
   final HttpUtils.Task task = httpUtils.url("http://www.example.com/postUrlencoded")
+      // 指定 urlencoded 类型 [application/x-www-form-urlencoded]。
       .urlencoded()
       .params(new String[]{
           "name", "test",
@@ -202,7 +204,8 @@ catch (HttpUtils.HttpException e) {
 ```java
 try {
   final HttpUtils.Task task = httpUtils.url("http://www.example.com/postUrlencoded")
-      .urlencoded()
+      // 指定 multi-part 类型 [multipart/form-data]。
+      .multiPart()
       .params(new Object[]{
           "name", "test",
           "gender", "boy",
