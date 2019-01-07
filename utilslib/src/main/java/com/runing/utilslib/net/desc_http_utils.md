@@ -83,11 +83,11 @@ httpUtils.url("http://www.example.com/download")
         // 下载进度。
       }
 
-      @Override public void onSucceed(String result) {
+      @Override public void onSucceed(HttpUtils.Task task, String result) {
         // 下载成功，返回 file.getPath().
       }
 
-      @Override public void onFailed(HttpUtils.HttpException e) {
+      @Override public void onFailed(HttpUtils.Task task, HttpUtils.HttpException e) {
         // 下载出错。
       }
     });
@@ -116,11 +116,12 @@ httpUtils.url("http://www.example.com/get", new String[]{
 // 异步方法。
 HttpUtils.Task task = httpUtils.url("http://www.example.com/get")
     .get(new HttpUtils.Listener() {
-      @Override public void onSucceed(String result) {
+      @Override public void onSucceed(HttpUtils.Task task) {
         // 返回请求结果。
+        task.result();
       }
 
-      @Override public void onFailed(HttpUtils.HttpException e) {
+      @Override public void onFailed(HttpUtils.Task task, HttpUtils.HttpException e) {
         // 请求出错。
       }
     });

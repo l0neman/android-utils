@@ -24,10 +24,10 @@ public interface HttpUtils {
   /** Request listener */
   interface Listener {
     /** request ok, callback result original content */
-    void onSucceed(String result);
+    void onSucceed(Task task);
 
     /** request error, callback exception */
-    void onFailed(HttpException e);
+    void onFailed(Task task, HttpException e);
   }
 
   /** Download method listener */

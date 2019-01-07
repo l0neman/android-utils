@@ -92,8 +92,11 @@ public class OkHttpUtils implements HttpUtils {
       final OkHttpClient.Builder builder = new OkHttpClient.Builder();
       if (cookieJar != null) { builder.cookieJar(cookieJar); }
 
+      if (cacheDir != null && cacheSize != 0) {
+        builder.cache(new okhttp3.Cache(cacheDir, cacheSize));
+      }
+
       OkHttpClient coreClient = builder
-          .cache(new okhttp3.Cache(cacheDir, cacheSize))
           .connectTimeout(connTimeOut, connTimeOutTimeUnit)
           .readTimeout(readTimeOut, readTimeOutTimeUnit)
           .build();
@@ -288,8 +291,11 @@ public class OkHttpUtils implements HttpUtils {
       if (isJson) {
         this.jsonString = getJsonString(params);
       }
-      else {
+      else if (isUrlencoded) {
         this.encodedParams = params;
+      }
+      else {
+        this.multiPartParams = params;
       }
       return this;
     }
@@ -483,6 +489,7 @@ public class OkHttpUtils implements HttpUtils {
             body.close();
             close(fos);
             task.setFile(target);
+            task.setResult(target.getPath());
             return task;
           }
           catch (IOException e) {
@@ -510,8 +517,12 @@ public class OkHttpUtils implements HttpUtils {
     Call call = mOkCallBuilder.get().build();
     final Task task = new Task(call);
     call.enqueue(new okhttp3.Callback() {
-      @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-        listener.onFailed(new HttpException(e));
+      @Override public void onFailure(@NonNull Call call, @NonNull final IOException e) {
+        mHandler.post(new Runnable() {
+          @Override public void run() {
+            listener.onFailed(task, new HttpException(e));
+          }
+        });
       }
 
       @Override
@@ -545,14 +556,19 @@ public class OkHttpUtils implements HttpUtils {
                   close(fos);
                   body.close();
                   task.setFile(target);
+                  task.setResult(target.getPath());
                   mHandler.post(new Runnable() {
                     @Override public void run() {
-                      listener.onSucceed(null);
+                      listener.onSucceed(task);
                     }
                   });
                 }
-                catch (IOException e) {
-                  listener.onFailed(new HttpException(e));
+                catch (final IOException e) {
+                  mHandler.post(new Runnable() {
+                    @Override public void run() {
+                      listener.onFailed(task, new HttpException(e));
+                    }
+                  });
                 }
                 finally {
                   close(fos);
@@ -562,11 +578,19 @@ public class OkHttpUtils implements HttpUtils {
             });
           }
           else {
-            listener.onFailed(new HttpException("body is null"));
+            mHandler.post(new Runnable() {
+              @Override public void run() {
+                listener.onFailed(task, new HttpException("body is null"));
+              }
+            });
           }
         }
         else {
-          listener.onFailed(new HttpException("code not 200: " + task.code()));
+          mHandler.post(new Runnable() {
+            @Override public void run() {
+              listener.onFailed(task, new HttpException("code not 200: " + task.code()));
+            }
+          });
         }
       }
     });
@@ -583,6 +607,7 @@ public class OkHttpUtils implements HttpUtils {
         ResponseBody body = response.body();
         if (body != null) {
           task.setResult(body.string());
+          body.close();
         }
         else {
           throw new HttpException("body is null");
@@ -602,8 +627,12 @@ public class OkHttpUtils implements HttpUtils {
     Call call = mOkCallBuilder.get().build();
     final Task task = new Task(call);
     call.enqueue(new okhttp3.Callback() {
-      @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-        listener.onFailed(new HttpException(e));
+      @Override public void onFailure(@NonNull Call call, @NonNull final IOException e) {
+        mHandler.post(new Runnable() {
+          @Override public void run() {
+            listener.onFailed(task, new HttpException(e));
+          }
+        });
       }
 
       @Override public void onResponse(@NonNull Call call, @NonNull Response response)
@@ -615,14 +644,26 @@ public class OkHttpUtils implements HttpUtils {
           if (body != null) {
             final String string = body.string();
             task.setResult(string);
-            listener.onSucceed(string);
+            mHandler.post(new Runnable() {
+              @Override public void run() {
+                listener.onSucceed(task);
+              }
+            });
           }
           else {
-            listener.onFailed(new HttpException("body is null"));
+            mHandler.post(new Runnable() {
+              @Override public void run() {
+                listener.onFailed(task, new HttpException("body is null"));
+              }
+            });
           }
         }
         else {
-          listener.onFailed(new HttpException("code not 200: " + code));
+          mHandler.post(new Runnable() {
+            @Override public void run() {
+              listener.onFailed(task, new HttpException("code not 200: " + code));
+            }
+          });
         }
       }
     });
@@ -658,8 +699,12 @@ public class OkHttpUtils implements HttpUtils {
     Call call = mOkCallBuilder.build();
     final Task task = new Task(call);
     call.enqueue(new okhttp3.Callback() {
-      @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-        listener.onFailed(new HttpException(e));
+      @Override public void onFailure(@NonNull Call call, @NonNull final IOException e) {
+        mHandler.post(new Runnable() {
+          @Override public void run() {
+            listener.onFailed(task, new HttpException(e));
+          }
+        });
       }
 
       @Override public void onResponse(@NonNull Call call, @NonNull Response response)
@@ -671,14 +716,26 @@ public class OkHttpUtils implements HttpUtils {
           if (body != null) {
             final String string = body.string();
             task.setResult(string);
-            listener.onSucceed(string);
+            mHandler.post(new Runnable() {
+              @Override public void run() {
+                listener.onSucceed(task);
+              }
+            });
           }
           else {
-            listener.onFailed(new HttpException("body is null"));
+            mHandler.post(new Runnable() {
+              @Override public void run() {
+                listener.onFailed(task, new HttpException("body is null"));
+              }
+            });
           }
         }
         else {
-          listener.onFailed(new HttpException("code not 200: " + code));
+          mHandler.post(new Runnable() {
+            @Override public void run() {
+              listener.onFailed(task, new HttpException("code not 200: " + code));
+            }
+          });
         }
       }
     });
