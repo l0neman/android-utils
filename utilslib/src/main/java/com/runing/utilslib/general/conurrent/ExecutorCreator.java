@@ -12,17 +12,39 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+/**
+ * 线程池工具构建器。
+ * <p>
+ * 参考 [Java 并发编程实战] 书中的线程池的大小设置。
+ * <p>
+ * 可使用默认的标准配置快速创建线程池，也可以使用链式方法创建自定义选项的线程池。
+ *
+ * <pre><code>
+ *
+ *   N_cpu = number of CPUs (CPU 数量);
+ *   U_cpu = target CPU utilization, 0 <= U_cpu <= 1 (目标 CPU 利用率);
+ *   W/C   = ratio of wait time to compute time (等待时间与计算时间的比较);
+ *
+ *   要使处理器达到期望的使用率，线程池的最优大小等于：
+ *
+ *   N_threads = N_cpi * U_cpu * (1 + W/C);
+ *
+ * </code></pre>
+ */
 public class ExecutorCreator {
-
+  /** Number of CPUs */
   private static final int CORE_NUMBER = Math.min(Runtime.getRuntime().availableProcessors(), 4);
+  /** 计算密集型线程池数量 */
   private static final int COMPUTE_POOL_SIZE = CORE_NUMBER + 1;
+  /** IO 密集型线程池数量 */
   private static final int IO_POOL_SIZE = CORE_NUMBER * 2 + 1;
+  /** 默认的线程空闲时间（秒） */
   private static final long DEFAULT_KEEP_ALIVE_TIME = 30L;
+  /** 工具的单例对象（for 链式调用） */
   private static ThreadLocal<Creator> sCreatorInstance;
 
   /**
-   * 清理工具对象（洁癖）.
+   * 清理工具对象。
    */
   public static void recycle() {
     sCreatorInstance = null;
@@ -50,7 +72,7 @@ public class ExecutorCreator {
         .maxPoolSize(IO_POOL_SIZE)
         .keepAliveTime(DEFAULT_KEEP_ALIVE_TIME)
         .threadLabel("io")
-        .threadPriority(Thread.NORM_PRIORITY - 1);
+        .threadPriority(Thread.NORM_PRIORITY + 1);
   }
 
   /**
@@ -62,7 +84,7 @@ public class ExecutorCreator {
         .maxPoolSize(COMPUTE_POOL_SIZE)
         .keepAliveTime(DEFAULT_KEEP_ALIVE_TIME)
         .threadLabel("compute")
-        .threadPriority(Thread.NORM_PRIORITY + 1);
+        .threadPriority(Thread.NORM_PRIORITY);
   }
 
   /**
@@ -74,7 +96,7 @@ public class ExecutorCreator {
         .maxPoolSize(Integer.MAX_VALUE)
         .workQueue(new SynchronousQueue<Runnable>(true))
         .threadLabel("lite")
-        .threadPriority(Thread.NORM_PRIORITY - 2);
+        .threadPriority(Thread.NORM_PRIORITY - 1);
   }
 
   /**
