@@ -1,7 +1,5 @@
 package com.runing.utilslib.general.conurrent;
 
-import androidx.annotation.NonNull;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -12,10 +10,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import androidx.annotation.NonNull;
+
 /**
  * 线程池工具构建器。
  * <p>
- * 参考 [Java 并发编程实战] 书中的线程池的大小设置。
+ * 参考 [Java 并发编程实战] 一书中的线程池的大小设置。
  * <p>
  * 可使用默认的标准配置快速创建线程池，也可以使用链式方法创建自定义选项的线程池。
  *
@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  *   要使处理器达到期望的使用率，线程池的最优大小等于：
  *
- *   N_threads = N_cpi * U_cpu * (1 + W/C);
+ *   N_threads = N_cpu * U_cpu * (1 + W/C);
  *
  * </code></pre>
  */
@@ -43,13 +43,12 @@ public class ExecutorCreator {
   /** 工具的单例对象（for 链式调用） */
   private static ThreadLocal<Creator> sCreatorInstance;
 
-  /**
-   * 清理工具对象。
-   */
+  /** 清理工具对象 */
   public static void recycle() {
     sCreatorInstance = null;
   }
 
+  /* 申请单例对象 */
   private static Creator apply() {
     if (sCreatorInstance == null) {
       sCreatorInstance = new ThreadLocal<>();
@@ -70,7 +69,7 @@ public class ExecutorCreator {
     return apply()
         .coreSize(CORE_NUMBER)
         .maxPoolSize(IO_POOL_SIZE)
-        .keepAliveTime(DEFAULT_KEEP_ALIVE_TIME)
+        .keepAliveTime(DEFAULT_KEEP_ALIVE_TIME, TimeUnit.SECONDS)
         .threadLabel("io")
         .threadPriority(Thread.NORM_PRIORITY + 1);
   }
@@ -79,10 +78,10 @@ public class ExecutorCreator {
    * 计算密集型，核心线程为 CPU 数，最大线程数为 CPU + 1。
    */
   public static Creator compute() {
-    return new Creator()
+    return apply()
         .coreSize(CORE_NUMBER)
         .maxPoolSize(COMPUTE_POOL_SIZE)
-        .keepAliveTime(DEFAULT_KEEP_ALIVE_TIME)
+        .keepAliveTime(DEFAULT_KEEP_ALIVE_TIME, TimeUnit.SECONDS)
         .threadLabel("compute")
         .threadPriority(Thread.NORM_PRIORITY);
   }
@@ -91,7 +90,7 @@ public class ExecutorCreator {
    * 轻型，无核心线程，默认无限线程数量。
    */
   public static Creator lite() {
-    return new Creator()
+    return apply()
         .coreSize(0)
         .maxPoolSize(Integer.MAX_VALUE)
         .workQueue(new SynchronousQueue<Runnable>(true))
@@ -103,7 +102,7 @@ public class ExecutorCreator {
    * 单线程。
    */
   public static Creator single() {
-    return new Creator()
+    return apply()
         .coreSize(1)
         .maxPoolSize(1)
         .threadLabel("single")
@@ -114,7 +113,7 @@ public class ExecutorCreator {
    * 自定义。
    */
   public static Creator custom() {
-    return new Creator();
+    return apply();
   }
 
   public static final class Creator {
@@ -124,6 +123,7 @@ public class ExecutorCreator {
     private int mMaxTaskSize = 0;
     private boolean isRecycleCore = false;
     private long mKeepAliveTime = 0;
+    private TimeUnit mTimeUnit = TimeUnit.SECONDS;
     private BlockingQueue<Runnable> mWorkQueue;
     private ThreadFactory mThreadFactory;
     private RejectedExecutionHandler mHandler;
@@ -143,33 +143,31 @@ public class ExecutorCreator {
       mThreadPriority = Thread.NORM_PRIORITY - 1;
     }
 
-    /**
-     * 核心线程数。
-     */
+    /** 核心线程数 */
     public Creator coreSize(int n) {
       mCorePoolSize = n;
       return this;
     }
 
     /**
-     * 通过 [ 线程等待时间 ] 和 [ 执行时间 ] 推算线程池大小。
+     * 通过线程等待时间和计算时间估算线程池大小。
+     *
+     * @param waitTime      线程等待时间
+     * @param calculateTime 计算时间
+     * @return for chained call.
      */
     public Creator maxPoolSize(long waitTime, long calculateTime) {
       mMaxPoolSize = (int) (CORE_NUMBER * (1 + waitTime * 1F / calculateTime));
       return this;
     }
 
-    /**
-     * 最大线程数。
-     */
+    /** 最大线程数 */
     public Creator maxPoolSize(int n) {
       mMaxPoolSize = n;
       return this;
     }
 
-    /**
-     * 最大任务队列数。
-     */
+    /** 最大任务队列数 */
     public Creator maxTaskSize(int n) {
       mMaxTaskSize = n;
       return this;
@@ -191,25 +189,19 @@ public class ExecutorCreator {
       return this;
     }
 
-    /**
-     * 允许回收核心线程。
-     */
+    /** 允许回收核心线程 */
     public Creator allowRecycleCore() {
       isRecycleCore = true;
       return this;
     }
 
-    /**
-     * 超时时间。
-     */
-    public Creator keepAliveTime(long time) {
+    /** 超时时间 */
+    public Creator keepAliveTime(long time, TimeUnit timeUnit) {
       mKeepAliveTime = time;
       return this;
     }
 
-    /**
-     * 指定任务队列。
-     */
+    /** 指定任务队列 */
     public Creator workQueue(BlockingQueue<Runnable> workQueue) {
       this.mWorkQueue = workQueue;
       return this;
@@ -238,24 +230,23 @@ public class ExecutorCreator {
       }
     }
 
-    /**
-     * 指定线程工厂。
-     */
+    /** 指定线程工厂 */
     public Creator threadFactory(ThreadFactory threadFactory) {
       this.mThreadFactory = threadFactory;
       return this;
     }
 
-    /**
-     * 任务拒绝处理。
-     */
+    /** 任务拒绝处理 */
     public Creator rejectedHandler(RejectedExecutionHandler handler) {
       this.mHandler = handler;
       return this;
     }
 
+    /** 构建线程池 */
     public ThreadPoolExecutor create() {
-      if (mHandler == null) { mHandler = new ThreadPoolExecutor.AbortPolicy(); }
+      if (mHandler == null) {
+        mHandler = new ThreadPoolExecutor.AbortPolicy();
+      }
 
       if (mWorkQueue == null) {
         if (mMaxTaskSize != 0) {
@@ -271,9 +262,11 @@ public class ExecutorCreator {
       }
 
       final ThreadPoolExecutor executor = new ThreadPoolExecutor(mCorePoolSize, mMaxPoolSize,
-          mKeepAliveTime, TimeUnit.SECONDS, mWorkQueue, mThreadFactory, mHandler);
+          mKeepAliveTime, mTimeUnit, mWorkQueue, mThreadFactory, mHandler);
 
-      if (isRecycleCore) { executor.allowCoreThreadTimeOut(true); }
+      if (isRecycleCore) {
+        executor.allowCoreThreadTimeOut(true);
+      }
 
       return executor;
     }

@@ -1,26 +1,30 @@
-package com.runing.urilslibtest.general.concurrent;
+# ExecutorCreator
 
-import com.runing.utilslib.general.conurrent.ExecutorCreator;
+[源码 - ExecutorCreator.java](./ExecutorCreator.java)
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+线程池工具构建器，提供默认的典型线程池，也可使用链式方法构造自定义线程池。
 
-public class ExecutorCreatorTest {
+## 1. 创建标准默认线程池。
 
-  private void test() {
+```java
 /* 创建单线程池 */
 ThreadPoolExecutor singleThreadPool = ExecutorCreator.single().create();
+
 /* 创建计算密集型线程池 */
 ThreadPoolExecutor computeThreadPool = ExecutorCreator.compute().create();
+
 /* 创建 IO 密集型线程池 */
 ThreadPoolExecutor ioThreadPool = ExecutorCreator.io().create();
+
 /* 创建轻型无限线程池 */
 ThreadPoolExecutor liteThreadPool = ExecutorCreator.lite().create();
+```
 
+## 2. 创建自定义线程池，将构造器参数转为链式，更直观方便。
+
+```java
 ExecutorCreator.custom()
+    // 核心线程数量。
     .coreSize(2)
     // 允许回收核心线程。
     .allowRecycleCore()
@@ -51,5 +55,4 @@ ExecutorCreator.custom()
         new Thread(runnable).start();
       }
     });
-  }
-}
+```
