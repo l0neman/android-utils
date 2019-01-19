@@ -1,4 +1,4 @@
-package com.runing.utilslib.general.conurrent;
+package com.runing.utilslib.general.concurrent;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
