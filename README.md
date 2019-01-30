@@ -36,7 +36,7 @@
 
 - 权限申请工具 - 简单，方便。
 
-[PermissionUtils](./utilslib/src/main/java/com/runing/utilslib/app/desc_permission_utils.md)
+[Permission](./utilslib/src/main/java/com/runing/utilslib/app/desc_permission_utils.md)
 
 ## general
 
