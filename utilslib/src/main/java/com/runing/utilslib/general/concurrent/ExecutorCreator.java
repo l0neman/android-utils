@@ -30,6 +30,8 @@ import androidx.annotation.NonNull;
  *   N_threads = N_cpu * U_cpu * (1 + W/C);
  *
  * </code></pre>
+ *
+ * todo 还需大量测试。
  */
 public class ExecutorCreator {
   /** Number of CPUs */

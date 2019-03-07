@@ -92,15 +92,17 @@ public class OkHttpUtils implements HttpUtils {
       final OkHttpClient.Builder builder = new OkHttpClient.Builder();
       if (cookieJar != null) { builder.cookieJar(cookieJar); }
 
+      Cache cache = null;
+
       if (cacheDir != null && cacheSize != 0) {
         builder.cache(new okhttp3.Cache(cacheDir, cacheSize));
+        cache = new Cache(cacheDir.getPath());
       }
 
       OkHttpClient coreClient = builder
           .connectTimeout(connTimeOut, connTimeOutTimeUnit)
           .readTimeout(readTimeOut, readTimeOutTimeUnit)
           .build();
-      Cache cache = new Cache(cacheDir.getPath());
       return new OkHttpUtils(coreClient, cache);
     }
   }
