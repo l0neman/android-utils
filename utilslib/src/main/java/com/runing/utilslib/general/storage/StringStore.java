@@ -39,9 +39,9 @@ public class StringStore {
   private static Map<String, ReentrantReadWriteLock> sLocks = new ConcurrentHashMap<>();
 
   // 异步存储线程池。
-  private static ExecutorService mSavingService = Executors.newSingleThreadExecutor();
+  private static ExecutorService sWritingService = Executors.newSingleThreadExecutor();
   // 异步读取线程池。
-  private static ExecutorService sReadingService = Executors.newSingleThreadExecutor();
+  private static ExecutorService sReadingService = Executors.newCachedThreadPool();
   private static Handler sHandler = new Handler(Looper.getMainLooper());
 
   /** 初始化 */
@@ -111,7 +111,7 @@ public class StringStore {
 
     public void writeAsync(final String content) {
       final ReentrantReadWriteLock lock = sLocks.get(file);
-      mSavingService.execute(new Runnable() {
+      sWritingService.execute(new Runnable() {
         @Override public void run() {
           if (lock != null) {
             lock.writeLock().lock();
@@ -202,43 +202,51 @@ public class StringStore {
   }
 
   public static void delete(String file) {
-    final ReentrantReadWriteLock lock = sLocks.get(file);
-    if (lock != null) {
-      lock.writeLock().lock();
-    }
-    try {
-      //noinspection StatementWithEmptyBody
-      if (new File(getFilePath(file)).delete()) {
+    sWritingService.execute(new Runnable() {
+      @Override public void run() {
+        final ReentrantReadWriteLock lock = sLocks.get(file);
+        if (lock != null) {
+          lock.writeLock().lock();
+        }
+        try {
+          //noinspection StatementWithEmptyBody
+          if (new File(getFilePath(file)).delete()) {
 //        Log.i(TAG, "delete file: " + file + " ok.");
-      }
-    }
-    catch (Exception e) {
+          }
+        }
+        catch (Exception e) {
 //      Log.e(TAG, "delete file: " + file, e);
-    }
-    if (lock != null) {
-      lock.writeLock().unlock();
-    }
-    // 移除锁缓存。
-    sLocks.remove(file);
+        }
+        if (lock != null) {
+          lock.writeLock().unlock();
+        }
+        // 移除锁缓存。
+        sLocks.remove(file);
+      }
+    });
   }
 
   public static void deleteAll() {
-    final Set<Map.Entry<String, ReentrantReadWriteLock>> entries = sLocks.entrySet();
-    for (Map.Entry<String, ReentrantReadWriteLock> entry : entries) {
-      entry.getValue().writeLock().lock();
-      final String file = entry.getKey();
-      try {
-        //noinspection StatementWithEmptyBody
-        if (new File(getFilePath(file)).delete()) {
+    sWritingService.execute(new Runnable() {
+      @Override public void run() {
+        final Set<Map.Entry<String, ReentrantReadWriteLock>> entries = sLocks.entrySet();
+        for (Map.Entry<String, ReentrantReadWriteLock> entry : entries) {
+          entry.getValue().writeLock().lock();
+          final String file = entry.getKey();
+          try {
+            //noinspection StatementWithEmptyBody
+            if (new File(getFilePath(file)).delete()) {
 //          Log.i(TAG, "delete file: " + file + " ok.");
-        }
-      }
-      catch (Exception e) {
+            }
+          }
+          catch (Exception e) {
 //        Log.e(TAG, "delete file: " + file, e);
+          }
+          entry.getValue().writeLock().unlock();
+        }
+        sLocks.clear();
       }
-      entry.getValue().writeLock().unlock();
-    }
-    sLocks.clear();
+    });
   }
 
   // utils:

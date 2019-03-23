@@ -36,7 +36,7 @@
 
 ### storage(存储类)
 
-- 简单字符串存储工具
+- 简单字符串存储工具 - 简单。
 
 [StringStore](./utilslib/src/main/java/com/runing/utilslib/general/storage/desc_string_store.md)
 

@@ -23,5 +23,10 @@ public class StringStoreTest {
         Log.d("file2Content", content);
       }
     });
+
+    // 删除单个文件。
+    StringStore.delete("file1");
+    // 清空所有文件。
+    StringStore.deleteAll();
   }
 }

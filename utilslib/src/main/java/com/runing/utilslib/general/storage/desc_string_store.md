@@ -5,12 +5,14 @@
 简单字符串存储工具，写入读取单个文件。
 （使用了 BIO；写入同一个文件时会阻塞其他写入和读取线程，读取时可并发）。
 
-- 1. 初始化
+## 1. 初始化
 
 ```java
 // 初始化路径，放在 application 中。
 StringStore.init(context);
 ```
+
+## 2. 使用
 
 - 存储字符串至文件
 
@@ -32,4 +34,13 @@ StringStore.readAsync("file2", new StringStore.ReadCallback() {
     Log.d("file2Content", content);
   }
 });
+```
+
+- 删除文件
+
+```java
+// 删除单个文件。
+StringStore.delete("file1");
+// 清空所有文件。
+StringStore.deleteAll();
 ```
