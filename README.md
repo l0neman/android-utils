@@ -6,9 +6,7 @@
 
 不断去改善，不断增加。
 
-## adpater
-
-适配器。
+## adpater(适配器类)
 
 - ListView Adapter - 极简。
 
@@ -22,53 +20,45 @@
 
 [HeaderRvAdapter](./utilslib/src/main/java/com/runing/utilslib/adapter/desc_header_rvadapter.md)
 
-## anim
-
-动画。
+## anim(动画类)
 
 - 动画创建器 - 简洁，链式。
 
 [AnimatorCreator](./utilslib/src/main/java/com/runing/utilslib/anim/desc_animator_creator.md)
 
-## app
-
-应用。
+## app(应用类)
 
 - 权限申请工具 - 简单，方便。
 
 [Permission](./utilslib/src/main/java/com/runing/utilslib/app/desc_permission_utils.md)
 
-## general
+## general(通用类)
 
-通用。
+### storage(存储类)
 
-### concurrent
+- 简单字符串存储工具
 
-并发。
+[StringStore](./utilslib/src/main/java/com/runing/utilslib/general/storage/desc_string_store.md)
+
+### concurrent(并发类)
 
 - 线程池构建器 - 快速，链式。
 
 [ExecutorCreator](./utilslib/src/main/java/com/runing/utilslib/general/concurrent/desc_executor_creator.md)
 
-### simplify
-
-简化封装。
+### simplify(化简类)
 
 - 命令执行工具 - 简单。
 
 [CommandExecutor](./utilslib/src/main/java/com/runing/utilslib/general/simplify/desc_command_executor.md)
 
-### sugar
-
-工具糖。
+### sugar(工具糖类)
 
 - 反射工具 - 快速，链式。
 
 [ReflectUtils](./utilslib/src/main/java/com/runing/utilslib/general/sugar/desc_reflect_utils.md)
 
-## net
-
-网络。
+## net(网络类)
 
 - 网络请求工具 - 基础。
 

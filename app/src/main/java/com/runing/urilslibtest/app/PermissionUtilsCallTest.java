@@ -45,40 +45,40 @@ public class PermissionUtilsCallTest extends Activity {
         }
       });
 
-@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-private Permission mPermission = Permission.newInstance(
-    new Permission.SingleCallback() {
-      @Override public void onGranted(String permission) {
-        /* 权限通过 */
-        Toast.makeText(self(), "granted permissions.", Toast.LENGTH_SHORT).show();
-      }
+  @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+  private Permission mPermission = Permission.newInstance(
+      new Permission.SingleCallback() {
+        @Override public void onGranted(String permission) {
+          /* 权限通过 */
+          Toast.makeText(self(), "granted permissions.", Toast.LENGTH_SHORT).show();
+        }
 
-      @Override public void onDenied(String permission) {
-        /* 权限被拒绝 */
-        Toast.makeText(self(), "denied permissions.", Toast.LENGTH_SHORT).show();
-      }
+        @Override public void onDenied(String permission) {
+          /* 权限被拒绝 */
+          Toast.makeText(self(), "denied permissions.", Toast.LENGTH_SHORT).show();
+        }
 
-      @Override public void onRationale(String permission) {
-        Toast.makeText(self(), "we need permissions.", Toast.LENGTH_SHORT).show();
-        /* 解释权限 */
-        new AlertDialog.Builder(PermissionUtilsCallTest.this)
-            .setPositiveButton("again", new DialogInterface.OnClickListener() {
-              @Override public void onClick(DialogInterface dialog, int which) {
-                /* 再次请求 */
-                mPermission.checkAndRequest(self(),
-                    true, Manifest.permission.READ_EXTERNAL_STORAGE);
-              }
-            })
-            .setNegativeButton("no", new DialogInterface.OnClickListener() {
-              @Override public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(self(), "no", Toast.LENGTH_SHORT).show();
-              }
-            })
-            .create()
-            .show();
+        @Override public void onRationale(String permission) {
+          Toast.makeText(self(), "we need permissions.", Toast.LENGTH_SHORT).show();
+          /* 解释权限 */
+          new AlertDialog.Builder(PermissionUtilsCallTest.this)
+              .setPositiveButton("again", new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface dialog, int which) {
+                  /* 再次请求 */
+                  mPermission.checkAndRequest(self(),
+                      true, Manifest.permission.READ_EXTERNAL_STORAGE);
+                }
+              })
+              .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface dialog, int which) {
+                  Toast.makeText(self(), "no", Toast.LENGTH_SHORT).show();
+                }
+              })
+              .create()
+              .show();
+        }
       }
-    }
-);
+  );
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
