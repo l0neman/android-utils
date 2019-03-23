@@ -2,6 +2,7 @@ package com.runing.utilslib.general.concurrent;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
@@ -9,8 +10,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import androidx.annotation.NonNull;
 
 /**
  * 线程池工具构建器。
@@ -30,8 +29,7 @@ import androidx.annotation.NonNull;
  *   N_threads = N_cpu * U_cpu * (1 + W/C);
  *
  * </code></pre>
- *
- * todo 还需大量测试。
+ * <p>
  */
 public class ExecutorCreator {
   /** Number of CPUs */
@@ -44,11 +42,6 @@ public class ExecutorCreator {
   private static final long DEFAULT_KEEP_ALIVE_TIME = 30L;
   /** 工具的单例对象（for 链式调用） */
   private static ThreadLocal<Creator> sCreatorInstance;
-
-  /** 清理工具对象 */
-  public static void recycle() {
-    sCreatorInstance = null;
-  }
 
   /* 申请单例对象 */
   private static Creator apply() {
@@ -66,6 +59,8 @@ public class ExecutorCreator {
 
   /**
    * IO 密集型，核心线程为 CPU 数，最大线程数为 CPU * 2 + 1。
+   * <p>
+   * 线程优先级增加，优先处理，让出 CPU 时间。
    */
   public static Creator io() {
     return apply()
@@ -90,23 +85,29 @@ public class ExecutorCreator {
 
   /**
    * 轻型，无核心线程，默认无限线程数量。
+   * <p>
+   * 参考 {@link Executors#newCachedThreadPool()}
    */
   public static Creator lite() {
     return apply()
         .coreSize(0)
         .maxPoolSize(Integer.MAX_VALUE)
-        .workQueue(new SynchronousQueue<Runnable>(true))
+        .keepAliveTime(60L, TimeUnit.SECONDS)
+        .workQueue(new SynchronousQueue<>())
         .threadLabel("lite")
         .threadPriority(Thread.NORM_PRIORITY - 1);
   }
 
   /**
    * 单线程。
+   * <p>
+   * 参考 {@link Executors#newSingleThreadExecutor()}
    */
   public static Creator single() {
     return apply()
         .coreSize(1)
         .maxPoolSize(1)
+        .workQueue(new LinkedBlockingQueue<>())
         .threadLabel("single")
         .threadPriority(Thread.NORM_PRIORITY);
   }
@@ -118,6 +119,12 @@ public class ExecutorCreator {
     return apply();
   }
 
+  /**
+   * 线程池链式创建工具。
+   * <p>
+   * 不指定线程队列和最大线程数则创建 {@link LinkedBlockingQueue}，否则
+   * 指定最大线程数则创建 {@link ArrayBlockingQueue}。
+   */
   public static final class Creator {
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
     private int mCorePoolSize = 0;
@@ -209,6 +216,7 @@ public class ExecutorCreator {
       return this;
     }
 
+    /* 默认线程工厂，生成线程名为 flag: t-i(i 累计) 格式的线程 */
     private static final class DefaultThreadFactory implements ThreadFactory {
 
       private final ThreadGroup group;
@@ -221,12 +229,13 @@ public class ExecutorCreator {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() :
             Thread.currentThread().getThreadGroup();
-        namePrefix = flag + ": thread-" + threadNumber.getAndIncrement();
+        namePrefix = flag + ": t-";
       }
 
       @Override
-      public Thread newThread(@NonNull Runnable r) {
-        final Thread thread = new Thread(group, r, namePrefix, 0);
+      public Thread newThread(Runnable r) {
+        final Thread thread = new Thread(group, r, namePrefix +
+            threadNumber.getAndIncrement(), 0);
         thread.setPriority(priority);
         return thread;
       }

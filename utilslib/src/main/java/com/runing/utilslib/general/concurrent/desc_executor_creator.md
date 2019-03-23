@@ -48,7 +48,7 @@ ExecutorCreator.custom()
         return new Thread(runnable);
       }
     })
-    // 线程拒绝处理。
+    // 线程拒绝处理器。
     .rejectedHandler(new RejectedExecutionHandler() {
       @Override
       public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor) {
