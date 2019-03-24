@@ -1,13 +1,15 @@
 package com.runing.utilslib.adapter;
 
-import androidx.annotation.NonNull;
-import androidx.collection.SparseArrayCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.collection.SparseArrayCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Simplify {@link RecyclerView} Adapter
@@ -100,7 +102,8 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
     final int layoutId;
     if (mMultiType == null) {
       layoutId = mItemId;
-    } else {
+    }
+    else {
       layoutId = viewType;
     }
     ViewHolder holder = new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(
@@ -111,7 +114,7 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
 
   private void setClickListener(final ViewHolder holder) {
     if (mOnItemClickListener != null) {
-      holder.itemView.setOnClickListener(new View.OnClickListener() {
+      getClickView(holder.itemView).setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
           mOnItemClickListener.onItemClick(holder.itemView, holder.getAdapterPosition());
@@ -119,7 +122,7 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
       });
     }
     if (mOnItemLongClickListener != null) {
-      holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+      getClickView(holder.itemView).setOnLongClickListener(new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
           mOnItemLongClickListener.onItemLongClick(holder.itemView,
@@ -128,6 +131,16 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
         }
       });
     }
+  }
+
+  private static View getClickView(View itemView) {
+    if (itemView instanceof FrameLayout) {
+      final ViewGroup view = (ViewGroup) itemView;
+      if (view.getChildCount() != 0) {
+        return view.getChildAt(0);
+      }
+    }
+    return itemView;
   }
 
   @Override
@@ -160,7 +173,7 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
         views.put(id, view);
       }
       @SuppressWarnings("unchecked")
-      T t = (T)view;
+      T t = (T) view;
       return t;
     }
   }
