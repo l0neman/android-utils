@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -23,6 +22,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 简单字符串存储工具。
  * <p>
  * 存储路径： Context$FileDir/sd/xx
+ *
+ * todo 有问题
  */
 public class StringStore {
 
@@ -72,12 +73,12 @@ public class StringStore {
     try {
       if (!file.exists()) {
         if (file.createNewFile()) {
-          Log.i(TAG, "create file: " + file + " ok.");
+//          Log.i(TAG, "create file: " + file + " ok.");
         }
       }
     }
     catch (IOException e) {
-      Log.e(TAG, "create file: " + file + " error", e);
+//      Log.e(TAG, "create file: " + file + " error", e);
     }
   }
 
@@ -93,17 +94,18 @@ public class StringStore {
 
     public void write(String content) {
       final ReentrantReadWriteLock lock = sLocks.get(file);
+      boolean isLock = false;
       if (lock != null) {
-        lock.writeLock().lock();
+        isLock = lock.writeLock().tryLock();
       }
       try {
         writeToFile(path, content);
       }
       catch (IOException e) {
-        Log.e(TAG, "save file: " + file + "error", e);
+//        Log.e(TAG, "save file: " + file + "error", e);
       }
       finally {
-        if (lock != null) {
+        if (lock != null && isLock) {
           lock.writeLock().unlock();
         }
       }
@@ -113,8 +115,9 @@ public class StringStore {
       final ReentrantReadWriteLock lock = sLocks.get(file);
       sWritingService.execute(new Runnable() {
         @Override public void run() {
+          boolean isLock = false;
           if (lock != null) {
-            lock.writeLock().lock();
+            isLock = lock.writeLock().tryLock();
           }
           SystemClock.sleep(4 * 1000);
           try {
@@ -124,7 +127,7 @@ public class StringStore {
 //            Log.e(TAG, "save file: " + file + "error", e);
           }
           finally {
-            if (lock != null) {
+            if (lock != null && isLock) {
               lock.writeLock().unlock();
             }
           }
@@ -148,8 +151,9 @@ public class StringStore {
   public static String read(String file) {
     String fullPath = getFilePath(file);
     final ReentrantReadWriteLock lock = sLocks.get(file);
+    boolean isLock = false;
     if (lock != null) {
-      lock.readLock().lock();
+      isLock = lock.readLock().tryLock();
     }
     try {
       return readFromFile(fullPath);
@@ -159,7 +163,7 @@ public class StringStore {
       return null;
     }
     finally {
-      if (lock != null) {
+      if (lock != null && isLock) {
         lock.readLock().unlock();
       }
     }
@@ -174,8 +178,9 @@ public class StringStore {
     final ReentrantReadWriteLock lock = sLocks.get(file);
     sReadingService.execute(new Runnable() {
       @Override public void run() {
+        boolean isLock = false;
         if (lock != null) {
-          lock.readLock().lock();
+          isLock = lock.readLock().tryLock();
         }
         String content = null;
 
@@ -186,7 +191,7 @@ public class StringStore {
 //          Log.e(TAG, "read file: " + file + "error", e);
         }
         finally {
-          if (lock != null) {
+          if (lock != null && isLock) {
             lock.readLock().unlock();
           }
         }
@@ -201,7 +206,7 @@ public class StringStore {
     });
   }
 
-  public static void delete(String file) {
+  public static void delete(final String file) {
     sWritingService.execute(new Runnable() {
       @Override public void run() {
         final ReentrantReadWriteLock lock = sLocks.get(file);
