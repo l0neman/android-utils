@@ -22,8 +22,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 简单字符串存储工具。
  * <p>
  * 存储路径： Context$FileDir/sd/xx
- *
- * todo 有问题
  */
 public class StringStore {
 
@@ -119,7 +117,6 @@ public class StringStore {
           if (lock != null) {
             isLock = lock.writeLock().tryLock();
           }
-          SystemClock.sleep(4 * 1000);
           try {
             writeToFile(path, content);
           }
