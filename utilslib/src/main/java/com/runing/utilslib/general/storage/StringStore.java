@@ -3,7 +3,6 @@ package com.runing.utilslib.general.storage;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -12,20 +11,23 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 简单字符串存储工具。
  * <p>
  * 存储路径： Context$FileDir/sd/xx
+ * <p>
+ * todo 1. 待测试。
+ * todo 2. 删除逻辑。
  */
 public class StringStore {
 
   private static final String TAG = StringStore.class.getSimpleName();
+  private static final boolean DEBUG = false;
 
   private static String sDataPath;
 
@@ -34,8 +36,9 @@ public class StringStore {
     @Override protected Store initialValue() { return new Store(); }
   };
 
-  // 对应的文件读写锁。
-  private static Map<String, ReentrantReadWriteLock> sLocks = new ConcurrentHashMap<>();
+  private static Map<String, AtomicInteger> sWriteLocks = new ConcurrentHashMap<>();
+  private static Map<String, AtomicInteger> sReadLocks = new ConcurrentHashMap<>();
+  private static Map<String, Object> sLocks = new ConcurrentHashMap<>();
 
   // 异步存储线程池。
   private static ExecutorService sWritingService = Executors.newSingleThreadExecutor();
@@ -90,12 +93,22 @@ public class StringStore {
       checkAndCreateFile(this.path);
     }
 
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter") // lock 为全局变量。
     public void write(String content) {
-      final ReentrantReadWriteLock lock = sLocks.get(file);
-      boolean isLock = false;
-      if (lock != null) {
-        isLock = lock.writeLock().tryLock();
+      // get lock.
+      final Object lock = sLocks.get(file);
+      AtomicInteger readLock = sReadLocks.get(file);
+      AtomicInteger writeLock = sWriteLocks.get(file);
+      // wait read threads.
+      synchronized (lock) {
+        while (readLock.get() != 0) {
+          try {
+            lock.wait();
+          }
+          catch (InterruptedException ignore) {}
+        }
       }
+      writeLock.getAndIncrement();
       try {
         writeToFile(path, content);
       }
@@ -103,20 +116,33 @@ public class StringStore {
 //        Log.e(TAG, "save file: " + file + "error", e);
       }
       finally {
-        if (lock != null && isLock) {
-          lock.writeLock().unlock();
+        writeLock.getAndDecrement();
+        // notify read threads.
+        if (writeLock.get() == 0) {
+          synchronized (lock) {
+            lock.notifyAll();
+          }
         }
       }
     }
 
     public void writeAsync(final String content) {
-      final ReentrantReadWriteLock lock = sLocks.get(file);
+      // get lock.
+      final Object lock = sLocks.get(file);
+      AtomicInteger readLock = sReadLocks.get(file);
+      AtomicInteger writeLock = sWriteLocks.get(file);
       sWritingService.execute(new Runnable() {
         @Override public void run() {
-          boolean isLock = false;
-          if (lock != null) {
-            isLock = lock.writeLock().tryLock();
+          // wait read threads.
+          synchronized (lock) {
+            while (readLock.get() != 0) {
+              try {
+                lock.wait();
+              }
+              catch (InterruptedException ignore) {}
+            }
           }
+          writeLock.getAndIncrement();
           try {
             writeToFile(path, content);
           }
@@ -124,8 +150,12 @@ public class StringStore {
 //            Log.e(TAG, "save file: " + file + "error", e);
           }
           finally {
-            if (lock != null && isLock) {
-              lock.writeLock().unlock();
+            writeLock.getAndDecrement();
+            // notify read threads.
+            if (writeLock.get() == 0) {
+              synchronized (lock) {
+                lock.notifyAll();
+              }
             }
           }
         }
@@ -139,19 +169,43 @@ public class StringStore {
       throw new NullPointerException("open error: " + file);
     }
     store.setFile(file);
-    if (!sLocks.containsKey(file)) {
-      sLocks.put(file, new ReentrantReadWriteLock());
-    }
+    checkAndSetLock(file);
     return store;
   }
 
+  private static void checkAndSetLock(String file) {
+    if (!sLocks.containsKey(file)) {
+      sLocks.put(file, new Object());
+    }
+    if (!sWriteLocks.containsKey(file)) {
+      sWriteLocks.put(file, new AtomicInteger(0));
+    }
+    if (!sReadLocks.containsKey(file)) {
+      sReadLocks.put(file, new AtomicInteger(0));
+    }
+  }
+
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter") // lock 为全局变量。
   public static String read(String file) {
     String fullPath = getFilePath(file);
-    final ReentrantReadWriteLock lock = sLocks.get(file);
-    boolean isLock = false;
-    if (lock != null) {
-      isLock = lock.readLock().tryLock();
+    checkAndSetLock(file);
+    // get lock.
+    final Object lock = sLocks.get(file);
+    AtomicInteger writeLock = sWriteLocks.get(file);
+    AtomicInteger readLock = sReadLocks.get(file);
+
+    // wait write threads.
+    synchronized (lock) {
+      while (writeLock.get() != 0) {
+        try {
+          lock.wait();
+        }
+        catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
     }
+    readLock.getAndIncrement();
     try {
       return readFromFile(fullPath);
     }
@@ -160,8 +214,12 @@ public class StringStore {
       return null;
     }
     finally {
-      if (lock != null && isLock) {
-        lock.readLock().unlock();
+      readLock.getAndDecrement();
+      // notify write threads.
+      if (readLock.get() == 0) {
+        synchronized (lock) {
+          lock.notifyAll();
+        }
       }
     }
   }
@@ -172,15 +230,26 @@ public class StringStore {
 
   public static void readAsync(final String file, final ReadCallback callback) {
     final String fullPath = getFilePath(file);
-    final ReentrantReadWriteLock lock = sLocks.get(file);
+    checkAndSetLock(file);
+    // get lock.
+    final Object lock = sLocks.get(file);
+    AtomicInteger writeLock = sWriteLocks.get(file);
+    AtomicInteger readLock = sReadLocks.get(file);
+
     sReadingService.execute(new Runnable() {
       @Override public void run() {
-        boolean isLock = false;
-        if (lock != null) {
-          isLock = lock.readLock().tryLock();
+        // wait write threads.
+        synchronized (lock) {
+          while (writeLock.get() != 0) {
+            try {
+              lock.wait();
+            }
+            catch (InterruptedException ignore) {}
+          }
         }
-        String content = null;
 
+        readLock.getAndIncrement();
+        String content = null;
         try {
           content = readFromFile(fullPath);
         }
@@ -188,8 +257,12 @@ public class StringStore {
 //          Log.e(TAG, "read file: " + file + "error", e);
         }
         finally {
-          if (lock != null && isLock) {
-            lock.readLock().unlock();
+          readLock.getAndDecrement();
+          // notify write reads.
+          if (readLock.get() == 0) {
+            synchronized (lock) {
+              lock.notifyAll();
+            }
           }
         }
 
@@ -204,6 +277,7 @@ public class StringStore {
   }
 
   public static void delete(final String file) {
+    /*
     sWritingService.execute(new Runnable() {
       @Override public void run() {
         final ReentrantReadWriteLock lock = sLocks.get(file);
@@ -226,9 +300,11 @@ public class StringStore {
         sLocks.remove(file);
       }
     });
+    // */
   }
 
   public static void deleteAll() {
+    /*
     sWritingService.execute(new Runnable() {
       @Override public void run() {
         final Set<Map.Entry<String, ReentrantReadWriteLock>> entries = sLocks.entrySet();
@@ -249,6 +325,7 @@ public class StringStore {
         sLocks.clear();
       }
     });
+    // */
   }
 
   // utils:
