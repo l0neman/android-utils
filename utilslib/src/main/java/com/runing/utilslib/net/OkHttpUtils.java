@@ -177,39 +177,39 @@ public class OkHttpUtils implements HttpUtils {
       this.mCall = mCall;
     }
 
-    private void setResult(String result) {
+    private synchronized void setResult(String result) {
       this.result = result;
     }
 
-    private void setFile(File file) {
+    private synchronized void setFile(File file) {
       this.file = file;
     }
 
-    private void setProgress(int progress) {
+    private synchronized void setProgress(int progress) {
       this.progress = progress;
     }
 
-    private void setCode(int code) {
+    private synchronized void setCode(int code) {
       this.code = code;
     }
 
-    @Override public <T> T result(Converter<T> converter) throws Exception {
+    @Override public synchronized <T> T result(Converter<T> converter) throws Exception {
       return converter.convert(result);
     }
 
-    @Override public String result() {
+    @Override public synchronized String result() {
       return result;
     }
 
-    @Override public File file() {
+    @Override public synchronized File file() {
       return file;
     }
 
-    @Override public int progress() {
+    @Override public synchronized int progress() {
       return progress;
     }
 
-    @Override public int code() {
+    @Override public synchronized int code() {
       return code;
     }
 
