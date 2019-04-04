@@ -3,13 +3,15 @@
 [源码 - StringStore.java](./StringStore.java)
 
 简单字符串存储工具，写入读取单个文件。
-（使用了 BIO；写入同一个文件时会阻塞其他写入和读取线程，读取时可并发）。
+（线程读写锁，异步保存后也可立即调用读取）。
 
 ## 1. 初始化
 
 ```java
-// 初始化路径，放在 application 中。
+// 初始化路径，在使用前调用。
 StringStore.init(context);
+// 或直接指定目录路径。
+StringStore.init(new File(context.getFilesDir(), "my").getPath());
 ```
 
 ## 2. 使用
@@ -39,8 +41,8 @@ StringStore.readAsync("file2", new StringStore.ReadCallback() {
 - 删除文件
 
 ```java
-// 删除单个文件。
+// 异步删除单个文件。
 StringStore.delete("file1");
-// 清空所有文件。
+// 异步清空所有文件。
 StringStore.deleteAll();
 ```

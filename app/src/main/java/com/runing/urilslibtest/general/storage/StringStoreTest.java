@@ -5,11 +5,16 @@ import android.util.Log;
 
 import com.runing.utilslib.general.storage.StringStore;
 
+import java.io.File;
+
 public class StringStoreTest {
 
   private void test(Context context) {
     // 初始化路径，放在 application 中。
     StringStore.init(context);
+    // 或直接指定路径。
+    StringStore.init(new File(context.getFilesDir(), "my").getPath());
+
     // 同步存储。
     StringStore.open("file1").write("content");
     // 异步存储。
