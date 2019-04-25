@@ -36,9 +36,9 @@
 
 ### storage(存储类)
 
-- 简单字符串存储工具 - 简单。
+- 简单存储工具 - 方便。
 
-[StringStore](./utilslib/src/main/java/com/runing/utilslib/general/storage/desc_string_store.md)
+[DirStore](./utilslib/src/main/java/com/runing/utilslib/general/storage/desc_dir_store.md)
 
 ### concurrent(并发类)
 

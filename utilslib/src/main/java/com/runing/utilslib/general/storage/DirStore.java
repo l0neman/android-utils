@@ -18,23 +18,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 简单字符串存储工具。
+ * Created by l0neman on 2019/04/24.
  * <p>
- * 默认存储路径： Context$FileDir/ss/
- * <p>
- * Created by l0neman on 2019/04/04.
+ * DirStore 实现类，目前只提供了 String 的 FileIOAdapter 类型。
  */
-public class StringStore implements IStringStore {
-  private static final String TAG = StringStore.class.getSimpleName();
+public class DirStore implements IDirStore {
+
+  private static final String TAG = DirStore.class.getSimpleName();
 
   /* 调试开关 */
   private static final boolean DEBUG = false;
   private String mDataPath;
 
-  // 保存当前线程正在存储的对象。
-  private ThreadLocal<Store> sStore = new ThreadLocal<Store>() {
-    @Override protected Store initialValue() { return new Store(); }
-  };
+  private Map<Class<?>, FileStoreThreadLocal<?>> sCacheFileStore = new ConcurrentHashMap<>();
+
+  private final class FileStoreThreadLocal<T> extends ThreadLocal<FileStore<T>> {
+    @Override protected FileStore<T> initialValue() {
+      return new FileStore<>();
+    }
+  }
 
   private Map<String, AtomicInteger> sWriteLocks = new ConcurrentHashMap<>();
   private Map<String, AtomicInteger> sReadLocks = new ConcurrentHashMap<>();
@@ -46,27 +48,34 @@ public class StringStore implements IStringStore {
   private ExecutorService sReadingService = Executors.newCachedThreadPool();
   private Handler sHandler = new Handler(Looper.getMainLooper());
 
-  public StringStore(Context context) {
-    this(context.getFilesDir().getPath() + File.separator + "sd");
+  public DirStore(Context context) {
+    this(context.getFilesDir().getPath() + File.separator + "ds");
   }
 
-  public StringStore(String dataPath) {
+  public DirStore(String dataPath) {
     this.mDataPath = dataPath;
     checkAndCreateDir(dataPath);
   }
 
-  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter") // lock 为成员变量。
-  public class Store implements IStringStore.StringStore {
+  private String getFilePath(String file) {
+    return mDataPath + File.separator + file;
+  }
+
+  public final class FileStore<T> implements IDirStore.FileStore<T> {
+
     private String name;
     private String path;
+    private FileIOAdapter<T> adapter;
 
-    private void setFile(String name) {
-      this.name = name;
-      this.path = getFilePath(name);
+    private void init(String fileName, FileIOAdapter<T> adapter) {
+      this.name = fileName;
+      this.path = getFilePath(fileName);
+      setAdapter(adapter);
       checkAndCreateFile(this.path);
     }
 
-    @Override public void write(String value) {
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter") // lock 为成员变量。
+    @Override public void write(final T value) throws IOException {
       // get lock.
       final Object lock = sLocks.get(name);
       AtomicInteger readLock = sReadLocks.get(name);
@@ -81,24 +90,19 @@ public class StringStore implements IStringStore {
         while (readLock.get() != 0) {
           try {
             lock.wait();
-          }
-          catch (InterruptedException e) {
+          } catch (InterruptedException e) {
             if (DEBUG) {
               Log.i(TAG, "write interrupted.");
             }
           }
         }
       }
+
       writeLock.getAndIncrement();
+
       try {
-        writeToFile(path, value);
-      }
-      catch (IOException e) {
-        if (DEBUG) {
-          Log.e(TAG, "save file: " + name + "error", e);
-        }
-      }
-      finally {
+        adapter.write(path, value);
+      } finally {
         writeLock.getAndDecrement();
         // notify read threads.
         if (writeLock.get() == 0) {
@@ -109,7 +113,7 @@ public class StringStore implements IStringStore {
       }
     }
 
-    @Override public void writeAsync(final String value) {
+    @Override public void writeAsync(final T value, WriteCallback callback) {
       // get lock.
       final Object lock = sLocks.get(name);
       final AtomicInteger readLock = sReadLocks.get(name);
@@ -126,24 +130,31 @@ public class StringStore implements IStringStore {
             while (readLock.get() != 0) {
               try {
                 lock.wait();
-              }
-              catch (InterruptedException e) {
+              } catch (InterruptedException e) {
                 if (DEBUG) {
                   Log.i(TAG, "writeAsync interrupted.");
                 }
               }
             }
           }
+
           writeLock.getAndIncrement();
+
           try {
-            writeToFile(path, value);
-          }
-          catch (IOException e) {
-            if (DEBUG) {
-              Log.e(TAG, "save file: " + name + "error", e);
+            adapter.write(path, value);
+          } catch (IOException e) {
+            if (callback != null) {
+              if (DEBUG) {
+                Log.e(TAG, "write file: " + name + "error", e);
+              }
+
+              sHandler.post(new Runnable() {
+                @Override public void run() {
+                  callback.onError(e);
+                }
+              });
             }
-          }
-          finally {
+          } finally {
             writeLock.getAndDecrement();
             // notify read threads.
             if (writeLock.get() == 0) {
@@ -157,7 +168,7 @@ public class StringStore implements IStringStore {
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter") // lock 为成员变量。
-    @Override public String read() {
+    @Override public T read() throws IOException {
       checkAndSetLock(name);
       // get lock.
       final Object lock = sLocks.get(name);
@@ -173,25 +184,18 @@ public class StringStore implements IStringStore {
         while (writeLock.get() != 0) {
           try {
             lock.wait();
-          }
-          catch (InterruptedException e) {
+          } catch (InterruptedException e) {
             if (DEBUG) {
               Log.i(TAG, "read interrupted.");
             }
           }
         }
       }
+
       readLock.getAndIncrement();
       try {
-        return readFromFile(path);
-      }
-      catch (IOException e) {
-        if (DEBUG) {
-          Log.e(TAG, "read file: " + name + "error", e);
-        }
-        return null;
-      }
-      finally {
+        return adapter.read(path);
+      } finally {
         readLock.getAndDecrement();
         // notify write threads.
         if (readLock.get() == 0) {
@@ -202,7 +206,7 @@ public class StringStore implements IStringStore {
       }
     }
 
-    @Override public void readAsync(final ReadCallback<String> callback) {
+    @Override public void readAsync(ReadCallback<T> callback) {
       checkAndSetLock(name);
       // get lock.
       final Object lock = sLocks.get(name);
@@ -220,8 +224,7 @@ public class StringStore implements IStringStore {
             while (writeLock.get() != 0) {
               try {
                 lock.wait();
-              }
-              catch (InterruptedException e) {
+              } catch (InterruptedException e) {
                 if (DEBUG) {
                   Log.i(TAG, "readAsync interrupted.");
                 }
@@ -230,16 +233,21 @@ public class StringStore implements IStringStore {
           }
 
           readLock.getAndIncrement();
-          String content = null;
+          T content = null;
           try {
-            content = readFromFile(path);
-          }
-          catch (IOException e) {
+            content = adapter.read(path);
+
+          } catch (IOException e) {
             if (DEBUG) {
               Log.e(TAG, "read file: " + name + "error", e);
             }
-          }
-          finally {
+
+            sHandler.post(new Runnable() {
+              @Override public void run() {
+                callback.onError(e);
+              }
+            });
+          } finally {
             readLock.getAndDecrement();
             // notify write reads.
             if (readLock.get() == 0) {
@@ -249,7 +257,7 @@ public class StringStore implements IStringStore {
             }
           }
 
-          final String copy = content;
+          final T copy = content;
           sHandler.post(new Runnable() {
             @Override public void run() {
               callback.onValue(copy);
@@ -258,20 +266,34 @@ public class StringStore implements IStringStore {
         }
       });
     }
-  }
 
-  private String getFilePath(String file) {
-    return mDataPath + File.separator + file;
-  }
-
-  @Override public StringStore open(String file) {
-    final Store store = sStore.get();
-    if (store == null) {
-      throw new NullPointerException("open error: " + file);
+    @Override public void setAdapter(FileIOAdapter<T> adapter) {
+      this.adapter = adapter;
     }
-    store.setFile(file);
-    checkAndSetLock(file);
-    return store;
+
+  }
+
+  @Override public <T> FileStore<T> with(String fileName, FileIOAdapter<T> adapter) {
+    @SuppressWarnings("unchecked")
+    FileStoreThreadLocal<T> storeThreadLocal = (FileStoreThreadLocal<T>)
+        sCacheFileStore.get(adapter.typeToken());
+
+    if (storeThreadLocal == null) {
+      storeThreadLocal = new FileStoreThreadLocal<>();
+      // 针对每个类型的文件存储做线程缓存。
+      sCacheFileStore.put(adapter.typeToken(), storeThreadLocal);
+    }
+
+    FileStore<T> fileStore = storeThreadLocal.get();
+
+    if (fileStore == null) {
+      throw new NullPointerException("with error: " + fileName);
+    }
+
+    fileStore.init(fileName, adapter);
+    // 针对每个文件名做不同的线程锁。
+    checkAndSetLock(fileName);
+    return fileStore;
   }
 
   private void checkAndSetLock(String file) {
@@ -286,13 +308,12 @@ public class StringStore implements IStringStore {
     }
   }
 
-  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter") // lock 为成员变量。
-  @Override public void delete(final String file) {
-    checkAndSetLock(file);
+  @Override public void deleteFile(String fileName) {
+    checkAndSetLock(fileName);
     // get lock.
-    final Object lock = sLocks.get(file);
-    final AtomicInteger writeLock = sWriteLocks.get(file);
-    final AtomicInteger readLock = sReadLocks.get(file);
+    final Object lock = sLocks.get(fileName);
+    final AtomicInteger writeLock = sWriteLocks.get(fileName);
+    final AtomicInteger readLock = sReadLocks.get(fileName);
 
     if (lock == null || writeLock == null || readLock == null) {
       throw new AssertionError("unexpected error.");
@@ -305,36 +326,36 @@ public class StringStore implements IStringStore {
           while (writeLock.get() != 0 || readLock.get() != 0) {
             try {
               lock.wait();
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
               if (DEBUG) {
                 Log.i(TAG, "delete interrupted.");
               }
             }
           }
         }
-        final File target = new File(getFilePath(file));
+
+        final File target = new File(getFilePath(fileName));
         if (!target.exists()) { return; }
 
         try {
           if (target.delete()) {
             if (DEBUG) {
-              Log.i(TAG, "delete file: " + file + " ok.");
+              Log.i(TAG, "delete file: " + fileName + " ok.");
             }
           }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
           if (DEBUG) {
-            Log.e(TAG, "delete file: " + file, e);
+            Log.e(TAG, "delete file: " + fileName, e);
           }
         }
-        sLocks.remove(file);
+
+        sLocks.remove(fileName);
       }
     });
   }
 
-  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter") // lock 为全局变量。
-  @Override public void deleteAll() {
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter") // lock 为成员变量。
+  @Override public void deleteSelf() {
     sWritingService.execute(new Runnable() {
       @Override public void run() {
         final File dir = new File(mDataPath);
@@ -362,8 +383,7 @@ public class StringStore implements IStringStore {
             while (writeLock.get() != 0 || readLock.get() != 0) {
               try {
                 lock.wait();
-              }
-              catch (InterruptedException e) {
+              } catch (InterruptedException e) {
                 if (DEBUG) {
                   Log.i(TAG, "deleteAll interrupted.");
                 }
@@ -381,6 +401,39 @@ public class StringStore implements IStringStore {
     });
   }
 
+  public static FileIOAdapter<String> STRING_IO_ADAPTER = new FileIOAdapter<String>() {
+    @Override public Class<String> typeToken() {
+      return String.class;
+    }
+
+    @Override public void write(String file, String value) throws IOException {
+      FileWriter writer = null;
+      try {
+        writer = new FileWriter(file);
+        writer.write(value);
+
+      } finally {
+        closeQuietly(writer);
+      }
+    }
+
+    @Override public String read(String file) throws IOException {
+      BufferedReader br = null;
+      try {
+        StringBuilder builder = new StringBuilder();
+        br = new BufferedReader(new FileReader(file));
+        String line;
+        while ((line = br.readLine()) != null) {
+          builder.append(line);
+        }
+        return builder.toString();
+
+      } finally {
+        closeQuietly(br);
+      }
+    }
+  };
+
   // file utils:
 
   private static void checkAndCreateFile(String path) {
@@ -393,8 +446,7 @@ public class StringStore implements IStringStore {
           }
         }
       }
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       if (DEBUG) {
         Log.e(TAG, "create file: " + file + " error", e);
       }
@@ -410,8 +462,7 @@ public class StringStore implements IStringStore {
             Log.d(TAG, "data dir create ok: " + dirPath);
           }
         }
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         if (DEBUG) {
           Log.e(TAG, "data dir create error", e);
         }
@@ -421,42 +472,12 @@ public class StringStore implements IStringStore {
 
   // io utils:
 
-  private static void writeToFile(String file, String content) throws IOException {
-    FileWriter writer = null;
-    try {
-      writer = new FileWriter(file);
-      writer.write(content);
-    }
-    finally {
-      closeQuietly(writer);
-    }
-  }
-
-  private static String readFromFile(String file) throws IOException {
-    BufferedReader br = null;
-    try {
-      StringBuilder builder = new StringBuilder();
-      br = new BufferedReader(new FileReader(file));
-      String line;
-      while ((line = br.readLine()) != null) {
-        builder.append(line);
-      }
-      return builder.toString();
-    }
-    finally {
-      closeQuietly(br);
-    }
-  }
-
   private static void closeQuietly(Closeable closeable) {
     if (closeable != null) {
       try {
         closeable.close();
-      }
-      catch (IOException e) {
-        e.printStackTrace();
-      }
-      catch (RuntimeException e) {
+      } catch (IOException ignore) {
+      } catch (RuntimeException e) {
         throw new RuntimeException(e);
       }
     }
