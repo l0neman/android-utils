@@ -12,15 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".MainActivity">
+        <activity android:name="io.l0neman.utilstest.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".app.PermissionUtilsCallTest"></activity>
-        <activity android:name=".net.HttpUtilsTest" />
+        <activity android:name="io.l0neman.utilstest.app.PermissionUtilsCallTest"></activity>
+        <activity android:name="io.l0neman.utilstest.net.HttpUtilsTest" />
     </application>
 
 </manifest>
