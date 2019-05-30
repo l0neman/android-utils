@@ -84,6 +84,7 @@ public abstract class BaseLvAdapter extends BaseAdapter {
     } else {
       itemId = mMultiType.getItemLayoutId(position);
     }
+
     ViewHolder holder = createViewHolder(parent.getContext(), convertView, parent, itemId);
     onBindViewHolder(holder, position);
     return holder.getItemView();
@@ -99,6 +100,7 @@ public abstract class BaseLvAdapter extends BaseAdapter {
     } else {
       holder = (ViewHolder)convertView.getTag(itemId);
     }
+
     return holder;
   }
 
@@ -107,6 +109,7 @@ public abstract class BaseLvAdapter extends BaseAdapter {
     if (mMultiType == null) {
       return super.getViewTypeCount();
     }
+
     return mMultiType.getItemTypeCount();
   }
 
@@ -115,6 +118,7 @@ public abstract class BaseLvAdapter extends BaseAdapter {
     if (mMultiType != null) {
       return mMultiType.getItemLayoutId(position);
     }
+
     return super.getItemViewType(position);
   }
 

@@ -30,11 +30,13 @@ public final class ReflectUtils {
     if (sUtilsInstance == null) {
       sUtilsInstance = new ThreadLocal<>();
     }
+
     ReflectUtils reflectUtils = sUtilsInstance.get();
     if (reflectUtils == null) {
       reflectUtils = new ReflectUtils();
       return reflectUtils;
     }
+
     reflectUtils.clear();
     reflectUtils.invoker.clear();
     reflectUtils.injector.clear();
@@ -98,6 +100,7 @@ public final class ReflectUtils {
         targetClass = targetClass.getSuperclass();
       }
     }
+
     return targetClass;
   }
 
@@ -175,8 +178,7 @@ public final class ReflectUtils {
 
       if (target != null) {
         field.set(target, value);
-      }
-      else {
+      } else {
         field.set(null, value);
       }
     }
@@ -194,6 +196,7 @@ public final class ReflectUtils {
      * Gets the value of the target.
      *
      * @return field value
+     *
      * @throws ReflectiveOperationException {@link NoSuchFieldException} or
      *                                      {@link IllegalAccessException}
      */
@@ -254,6 +257,7 @@ public final class ReflectUtils {
      *
      * @param params method's params
      * @return method result
+     *
      * @throws Exception {@link NoSuchFieldException} or {@link IllegalAccessException} or
      *                   {@link InvocationTargetException}
      */
@@ -273,6 +277,7 @@ public final class ReflectUtils {
      *
      * @param params method's params
      * @return method result
+     *
      * @throws ReflectiveOperationException {@link NoSuchFieldException} or {@link IllegalAccessException} or
      *                                      {@link InvocationTargetException}
      */

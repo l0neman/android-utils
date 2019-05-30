@@ -3,14 +3,14 @@ package com.runing.utilslib.app;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 /**
  * Permission request utils
@@ -85,8 +85,7 @@ public final class Permission {
 
     if (mCallBack instanceof MultiCallBack) {
       checkAndRequestMulti(activity, ignoreRationale, new String[]{permission});
-    }
-    else {
+    } else {
       checkAndRequestSingle(activity, ignoreRationale, permission);
     }
   }
@@ -105,8 +104,7 @@ public final class Permission {
 
     if (mCallBack instanceof MultiCallBack) {
       checkAndRequestMulti(activity, ignoreRationale, permissions);
-    }
-    else {
+    } else {
       checkAndRequestSingle(activity, ignoreRationale, permissions[0]);
     }
   }
@@ -118,11 +116,12 @@ public final class Permission {
         mCallBack.onRationale(permission);
         return;
       }
+
       mRequestPermissions.add(permission);
-    }
-    else {
+    } else {
       mCallBack.onGranted(permission);
     }
+
     if (!mRequestPermissions.isEmpty()) {
       ActivityCompat.requestPermissions(
           activity, new String[]{mRequestPermissions.get(0)}, PERMISSION_REQUEST_CODE
@@ -139,18 +138,18 @@ public final class Permission {
           mGrantedPermissions.add(permission);
           return;
         }
+
         mRequestPermissions.add(permission);
-      }
-      else {
+      } else {
         mCallBack.onGranted(permission);
       }
     }
+
     if (!mRequestPermissions.isEmpty()) {
       ActivityCompat.requestPermissions(
           activity, mRequestPermissions.toArray(new String[0]), PERMISSION_REQUEST_CODE
       );
-    }
-    else {
+    } else {
       ((MultiCallBack) mCallBack).onGrantedAll();
     }
   }
@@ -159,13 +158,14 @@ public final class Permission {
     if (requestCode != PERMISSION_REQUEST_CODE) {
       return;
     }
-    if (grantResults.length == 0 || permissions.length == 0 || grantResults.length != permissions.length) {
+
+    if (permissions.length == 0 || grantResults.length != permissions.length) {
       return;
     }
+
     if (mCallBack instanceof MultiCallBack) {
       handleMultiPermissionResult(permissions, grantResults);
-    }
-    else {
+    } else {
       handleSinglePermissionResult(permissions[0], grantResults[0]);
     }
   }
@@ -176,16 +176,15 @@ public final class Permission {
     for (int i = 0; i < permissions.length; i++) {
       if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
         callBack.onGranted(permissions[i]);
-      }
-      else {
+      } else {
         isAllGranted = false;
         callBack.onDenied(permissions[i]);
       }
     }
+
     if (isAllGranted) {
       callBack.onGrantedAll();
-    }
-    else {
+    } else {
       callBack.onGrantedPart(mGrantedPermissions);
     }
   }
@@ -194,8 +193,7 @@ public final class Permission {
     if (grantResults == PackageManager.PERMISSION_GRANTED) {
       mCallBack.onGranted(permission);
       mGrantedPermissions.add(permission);
-    }
-    else {
+    } else {
       mCallBack.onDenied(permission);
     }
   }

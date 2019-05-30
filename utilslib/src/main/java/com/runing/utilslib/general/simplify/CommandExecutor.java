@@ -49,8 +49,7 @@ public final class CommandExecutor implements ICommandExecutor {
         .redirectErrorStream(true);
     try {
       this.process = pb.start();
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new CommandException(e);
     }
   }
@@ -61,8 +60,7 @@ public final class CommandExecutor implements ICommandExecutor {
       os.write(cmd.getBytes());
       os.write("\n".getBytes());
       os.flush();
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new CommandException(e);
     }
   }
@@ -74,10 +72,10 @@ public final class CommandExecutor implements ICommandExecutor {
     int exitValue;
     try {
       exitValue = this.process.waitFor();
-    }
-    catch (InterruptedException ignore) {
+    } catch (InterruptedException ignore) {
       exitValue = -1;
     }
+
     return new Result(lines, content, exitValue);
   }
 
@@ -93,10 +91,10 @@ public final class CommandExecutor implements ICommandExecutor {
         int exitValue;
         try {
           exitValue = ce.process.waitFor();
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
           exitValue = -1;
         }
+
         callback.onSuccess(new Result(lines, content, exitValue));
       }
     });
@@ -118,9 +116,9 @@ public final class CommandExecutor implements ICommandExecutor {
           lines.add(nextLine);
         }
       }
+
       return builder.toString();
-    }
-    catch (IllegalStateException ignore) {}
+    } catch (IllegalStateException ignore) {}
     return "";
   }
 
@@ -130,16 +128,15 @@ public final class CommandExecutor implements ICommandExecutor {
     if (process == null) {
       return;
     }
+
     process.destroy();
 
     try {
       process.getInputStream().close();
-    }
-    catch (IOException ignore) {}
+    } catch (IOException ignore) {}
 
     try {
       process.getOutputStream().close();
-    }
-    catch (IOException ignore) {}
+    } catch (IOException ignore) {}
   }
 }

@@ -3,6 +3,7 @@ package com.runing.utilslib.adapter;
 import androidx.annotation.NonNull;
 import androidx.collection.SparseArrayCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -52,10 +53,12 @@ public final class HeaderRvAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     if (headerView != null) {
       return createViewHolder(headerView);
     }
+
     View footerView = mFooterViews.get(viewType);
     if (footerView != null) {
       return createViewHolder(footerView);
     }
+
     return mAdapter.onCreateViewHolder(parent, viewType);
   }
 
@@ -73,6 +76,7 @@ public final class HeaderRvAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return mAdapter.getItemId(position);
       }
     }
+
     return -1;
   }
 
@@ -106,6 +110,7 @@ public final class HeaderRvAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return mAdapter.getItemViewType(adapterPosition);
       }
     }
+
     return mFooterViews.keyAt(adapterPosition - adapterCount);
   }
 
@@ -114,6 +119,7 @@ public final class HeaderRvAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     if (mAdapter != null) {
       return mAdapter.getItemCount() + getHeaderCount() + getFooterCount();
     }
+
     return getHeaderCount() + getFooterCount();
   }
 }

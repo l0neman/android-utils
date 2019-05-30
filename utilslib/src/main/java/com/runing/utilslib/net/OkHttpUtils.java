@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
+
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.CookieJar;
@@ -150,8 +151,7 @@ public class OkHttpUtils implements HttpUtils {
       if (file.isFile()) {
         //noinspection ResultOfMethodCallIgnored
         file.delete();
-      }
-      else if (file.isDirectory()) {
+      } else if (file.isDirectory()) {
         File[] files = file.listFiles();
         for (int i = files.length - 1; i >= 0; i--) {
           delete(files[i].getAbsolutePath());
@@ -283,8 +283,7 @@ public class OkHttpUtils implements HttpUtils {
       for (int i = 0; i < param.length; i += 2) {
         try {
           json.put((String) param[i], param[i + 1]);
-        }
-        catch (JSONException ignore) {}
+        } catch (JSONException ignore) {}
       }
       return json.toString();
     }
@@ -292,11 +291,9 @@ public class OkHttpUtils implements HttpUtils {
     OkCallBuilder params(String[] params) {
       if (isJson) {
         this.jsonString = getJsonString(params);
-      }
-      else if (isUrlencoded) {
+      } else if (isUrlencoded) {
         this.encodedParams = params;
-      }
-      else {
+      } else {
         this.multiPartParams = params;
       }
       return this;
@@ -305,8 +302,7 @@ public class OkHttpUtils implements HttpUtils {
     OkCallBuilder params(Object[] params) {
       if (isJson) {
         this.jsonString = getJsonString(params);
-      }
-      else {
+      } else {
         this.multiPartParams = params;
       }
       return this;
@@ -349,15 +345,13 @@ public class OkHttpUtils implements HttpUtils {
       if (isJson) {
         RequestBody requestBody = RequestBody.create(MEDIA_TYPE_JSON, jsonString);
         this.builder.post(requestBody);
-      }
-      else if (isUrlencoded) {
+      } else if (isUrlencoded) {
         FormBody.Builder builder = new FormBody.Builder();
         for (int i = 0; i < encodedParams.length; i += 2) {
           builder.add(encodedParams[i], encodedParams[i + 1]);
         }
         this.builder.post(builder.build());
-      }
-      else if (isMultiPart) {
+      } else if (isMultiPart) {
         MultipartBody.Builder builder = new MultipartBody.Builder()
             .setType(MultipartBody.FORM);
         for (int i = 0; i < multiPartParams.length; i += 2) {
@@ -365,8 +359,7 @@ public class OkHttpUtils implements HttpUtils {
             File file = (File) multiPartParams[i + 1];
             builder.addFormDataPart((String) multiPartParams[i],
                 file.getName(), RequestBody.create(MEDIA_TYPE_FILE, file));
-          }
-          else {
+          } else {
             builder.addFormDataPart((String) multiPartParams[i], (String) multiPartParams[i + 1]);
           }
         }
@@ -401,8 +394,7 @@ public class OkHttpUtils implements HttpUtils {
     StringBuilder urlBuilder = new StringBuilder(url);
     if (urlParams == null || urlParams.length == 0) {
       mOkCallBuilder.url(url);
-    }
-    else {
+    } else {
       if (!url.contains("?")) {
         urlBuilder.append("?");
       }
@@ -493,24 +485,19 @@ public class OkHttpUtils implements HttpUtils {
             task.setFile(target);
             task.setResult(target.getPath());
             return task;
-          }
-          catch (IOException e) {
+          } catch (IOException e) {
             throw new HttpException(e);
-          }
-          finally {
+          } finally {
             body.close();
             close(fos);
           }
-        }
-        else {
+        } else {
           throw new HttpException("body is null");
         }
-      }
-      else {
+      } else {
         throw new HttpException("code not 200: " + task.code());
       }
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new HttpException(e);
     }
   }
@@ -564,30 +551,26 @@ public class OkHttpUtils implements HttpUtils {
                       listener.onSucceed(task);
                     }
                   });
-                }
-                catch (final IOException e) {
+                } catch (final IOException e) {
                   mHandler.post(new Runnable() {
                     @Override public void run() {
                       listener.onFailed(task, new HttpException(e));
                     }
                   });
-                }
-                finally {
+                } finally {
                   close(fos);
                   body.close();
                 }
               }
             });
-          }
-          else {
+          } else {
             mHandler.post(new Runnable() {
               @Override public void run() {
                 listener.onFailed(task, new HttpException("body is null"));
               }
             });
           }
-        }
-        else {
+        } else {
           mHandler.post(new Runnable() {
             @Override public void run() {
               listener.onFailed(task, new HttpException("code not 200: " + task.code()));
@@ -610,16 +593,13 @@ public class OkHttpUtils implements HttpUtils {
         if (body != null) {
           task.setResult(body.string());
           body.close();
-        }
-        else {
+        } else {
           throw new HttpException("body is null");
         }
-      }
-      else {
+      } else {
         throw new HttpException("code not 200: " + task.code());
       }
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new HttpException(e);
     }
     return task;
@@ -651,16 +631,14 @@ public class OkHttpUtils implements HttpUtils {
                 listener.onSucceed(task);
               }
             });
-          }
-          else {
+          } else {
             mHandler.post(new Runnable() {
               @Override public void run() {
                 listener.onFailed(task, new HttpException("body is null"));
               }
             });
           }
-        }
-        else {
+        } else {
           mHandler.post(new Runnable() {
             @Override public void run() {
               listener.onFailed(task, new HttpException("code not 200: " + code));
@@ -682,16 +660,13 @@ public class OkHttpUtils implements HttpUtils {
         ResponseBody body = response.body();
         if (body != null) {
           task.setResult(body.string());
-        }
-        else {
+        } else {
           throw new HttpException("body is null");
         }
-      }
-      else {
+      } else {
         throw new HttpException("code not 200: " + task.code());
       }
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new HttpException(e);
     }
     return task;
@@ -723,16 +698,14 @@ public class OkHttpUtils implements HttpUtils {
                 listener.onSucceed(task);
               }
             });
-          }
-          else {
+          } else {
             mHandler.post(new Runnable() {
               @Override public void run() {
                 listener.onFailed(task, new HttpException("body is null"));
               }
             });
           }
-        }
-        else {
+        } else {
           mHandler.post(new Runnable() {
             @Override public void run() {
               listener.onFailed(task, new HttpException("code not 200: " + code));
@@ -746,8 +719,7 @@ public class OkHttpUtils implements HttpUtils {
 
   private static void close(Closeable closeable) {
     if (closeable != null) {
-      try { closeable.close(); }
-      catch (IOException ignore) {}
+      try { closeable.close(); } catch (IOException ignore) {}
     }
   }
 }

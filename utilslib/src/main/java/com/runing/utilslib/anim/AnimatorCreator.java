@@ -220,6 +220,7 @@ public final class AnimatorCreator {
     } else {
       addConfig((ValueAnimator)animator);
     }
+
     return animator;
   }
 
@@ -232,6 +233,7 @@ public final class AnimatorCreator {
     } else {
       addConfig((ValueAnimator)animator);
     }
+
     return animator;
   }
 
@@ -244,6 +246,7 @@ public final class AnimatorCreator {
     } else {
       addConfig((ValueAnimator)animator);
     }
+
     return animator;
   }
 
@@ -252,6 +255,7 @@ public final class AnimatorCreator {
     if (animType == ANIM_TYPE_VALUE || propertyValues.isEmpty()) {
       return ValueAnimator.ofInt(0);
     }
+
     PropertyValuesHolder[] propertyValueArray = new PropertyValuesHolder[propertyValues.size()];
     propertyValues.toArray(propertyValueArray);
     final ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(target, propertyValueArray);
@@ -263,23 +267,29 @@ public final class AnimatorCreator {
     if (interpolator != null) {
       animator.setInterpolator(interpolator);
     }
+
     if (repeatMode != 0L) {
       animator.setRepeatMode(repeatMode);
     }
+
     if (repeatCount != 0L) {
       animator.setRepeatCount(repeatCount);
     }
+
     if (duration != 0L) {
       animator.setDuration(duration);
     }
+
     if (startDelay != 0L) {
       animator.setStartDelay(startDelay);
     }
+
     if (!listeners.isEmpty()) {
       for (Animator.AnimatorListener listener : listeners) {
         animator.addListener(listener);
       }
     }
+
     if (!updateListeners.isEmpty()) {
       for (ValueAnimator.AnimatorUpdateListener updateListener : updateListeners) {
         animator.addUpdateListener(updateListener);
@@ -291,23 +301,29 @@ public final class AnimatorCreator {
     if (interpolator != null) {
       animator.setInterpolator(interpolator);
     }
+
     if (repeatMode != 0L) {
       animator.setRepeatMode(repeatMode);
     }
+
     if (repeatCount != 0L) {
       animator.setRepeatCount(repeatCount);
     }
+
     if (duration != 0L) {
       animator.setDuration(duration);
     }
+
     if (startDelay != 0L) {
       animator.setStartDelay(startDelay);
     }
+
     if (!listeners.isEmpty()) {
       for (Animator.AnimatorListener listener : listeners) {
         animator.addListener(listener);
       }
     }
+
     if (!updateListeners.isEmpty()) {
       for (ValueAnimator.AnimatorUpdateListener updateListener : updateListeners) {
         animator.addUpdateListener(updateListener);

@@ -48,11 +48,13 @@ public class ExecutorCreator {
     if (sCreatorInstance == null) {
       sCreatorInstance = new ThreadLocal<>();
     }
+
     Creator creator = sCreatorInstance.get();
     if (creator == null) {
       creator = new Creator();
       return creator;
     }
+
     creator.clear();
     return creator;
   }
@@ -262,8 +264,7 @@ public class ExecutorCreator {
       if (mWorkQueue == null) {
         if (mMaxTaskSize != 0) {
           mWorkQueue = new ArrayBlockingQueue<>(mMaxTaskSize);
-        }
-        else {
+        } else {
           mWorkQueue = new LinkedBlockingQueue<>();
         }
       }

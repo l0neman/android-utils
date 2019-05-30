@@ -79,6 +79,7 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
     if (mMultiType != null) {
       return mMultiType.getItemLayoutId(position);
     }
+
     return super.getItemViewType(position);
   }
 
@@ -102,10 +103,10 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
     final int layoutId;
     if (mMultiType == null) {
       layoutId = mItemId;
-    }
-    else {
+    } else {
       layoutId = viewType;
     }
+
     ViewHolder holder = new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(
         layoutId, parent, false));
     setClickListener(holder);
@@ -121,6 +122,7 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
         }
       });
     }
+
     if (mOnItemLongClickListener != null) {
       getClickView(holder.itemView).setOnLongClickListener(new View.OnLongClickListener() {
         @Override
@@ -140,6 +142,7 @@ public abstract class BaseRvAdapter extends RecyclerView.Adapter<BaseRvAdapter.V
         return view.getChildAt(0);
       }
     }
+
     return itemView;
   }
 
