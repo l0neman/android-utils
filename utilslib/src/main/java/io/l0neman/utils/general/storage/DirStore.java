@@ -113,7 +113,7 @@ public class DirStore implements IDirStore {
       }
     }
 
-    @Override public void writeAsync(final T value, WriteCallback callback) {
+    @Override public void writeAsync(final T value,final WriteCallback callback) {
       // get lock.
       final Object lock = sLocks.get(name);
       final AtomicInteger readLock = sReadLocks.get(name);
@@ -142,7 +142,7 @@ public class DirStore implements IDirStore {
 
           try {
             adapter.write(path, value);
-          } catch (IOException e) {
+          } catch (final IOException e) {
             if (callback != null) {
               if (DEBUG) {
                 Log.e(TAG, "write file: " + name + "error", e);
@@ -206,7 +206,7 @@ public class DirStore implements IDirStore {
       }
     }
 
-    @Override public void readAsync(ReadCallback<T> callback) {
+    @Override public void readAsync(final ReadCallback<T> callback) {
       checkAndSetLock(name);
       // get lock.
       final Object lock = sLocks.get(name);
@@ -237,7 +237,7 @@ public class DirStore implements IDirStore {
           try {
             content = adapter.read(path);
 
-          } catch (IOException e) {
+          } catch (final IOException e) {
             if (DEBUG) {
               Log.e(TAG, "read file: " + name + "error", e);
             }
@@ -308,7 +308,7 @@ public class DirStore implements IDirStore {
     }
   }
 
-  @Override public void deleteFile(String fileName) {
+  @Override public void deleteFile(final String fileName) {
     checkAndSetLock(fileName);
     // get lock.
     final Object lock = sLocks.get(fileName);
