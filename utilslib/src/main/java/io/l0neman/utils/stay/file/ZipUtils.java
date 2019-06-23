@@ -16,9 +16,19 @@ import io.l0neman.utils.stay.io.IOUtils;
 
 /**
  * Created by l0neman on 2019/05/13.
+ * <p>
+ * Easy zip utils.
  */
 public class ZipUtils {
 
+  /**
+   * Eunzip the zip package to the specified folder.
+   *
+   * @param zip     zip file.
+   * @param outDir  out dir.
+   * @param isForce If true, overwrite the file with the same name.
+   * @throws ZipException out dir invalid and other cases.
+   */
   public static void unzip(File zip, String outDir, boolean isForce) throws ZipException {
     final File out = new File(outDir);
     if (out.isFile()) {
@@ -73,6 +83,14 @@ public class ZipUtils {
     IOUtils.transfer(zipIs, out, true);
   }
 
+  /**
+   * Extract a single entry to the specified file.
+   *
+   * @param zip       zip file.
+   * @param entryName zip entry name.
+   * @param outFile   out file.
+   * @throws ZipException out file invalid and other cases
+   */
   public static void unzipEntry(File zip, String entryName, File outFile) throws ZipException {
     if (outFile.exists() && outFile.isDirectory()) {
       throw new ZipException("unzip error: outFile invalid.");

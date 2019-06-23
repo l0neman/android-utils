@@ -19,19 +19,17 @@ import java.nio.channels.WritableByteChannel;
  */
 public class IOUtils {
 
-  public static String read(File file) throws IOException {
+  public static String read(File file, String csName) throws IOException {
     Closer closer = Closer.create();
     try {
-      FileChannel channel = closer.register(new FileInputStream(file).getChannel());
-      StringBuilder sb = new StringBuilder();
-      ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-      final long size = channel.size();
+      final BufferedReader reader = closer.register(
+          new BufferedReader(Channels.newReader(new FileInputStream(file).getChannel(), csName))
+      );
 
-      while (channel.position() < size) {
-        byteBuffer.clear();
-        channel.read(byteBuffer);
-        byteBuffer.flip();
-        sb.append(new String(byteBuffer.array(), byteBuffer.position(), byteBuffer.limit()));
+      String line;
+      StringBuilder sb = new StringBuilder();
+      while ((line = reader.readLine()) != null) {
+        sb.append(line);
       }
       return sb.toString();
     } finally {
