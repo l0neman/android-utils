@@ -1,8 +1,8 @@
 # ReflectUtils
 
-[源码 - ReflectUtils.java](ReflectUtils.java)
+[源码 - Reflect.java](Reflect.java)
 
-链式包装反射工具，使用简单直接。
+链式包装反射工具，用起来流畅自然。
 
 - 示例中的目标对象：
 
@@ -25,22 +25,22 @@ private static final class Target extends Base {
 
 ```java
 try {
-  // set value.
-  ReflectUtils.inject(target)
+  // 注入。
+  Reflect.with(target).injector()
       .field("str")
       .set("rts");
 } catch (Exception e) {
   /* 如果需要判断异常类型 */
-  if (e instanceof NoSuchFieldException) { }
-  else if (e instanceof IllegalAccessException) { }
-  else { throw new AssertionError("UNKNOWN ERROR."); }
+  if (e instanceof NoSuchFieldException) {
+  } else if (e instanceof IllegalAccessException) {
+  } else { throw new AssertionError("UNKNOWN ERROR."); }
 }
 ```
 
 ```java
 try {
-  // get value.
-  String str = (String) ReflectUtils.inject(target)
+  // 读取。
+  String str = Reflect.with(target).injector()
       .field("str")
       .get();
 } catch (Exception ignore) {}
@@ -50,8 +50,8 @@ try {
 
 ```java
 try {
-  // set value.
-  ReflectUtils.inject(Target.class)
+  // 注入。
+  Reflect.with(Target.class).injector()
       .field("sInt")
       .set(2);
 } catch (Exception ignore) {}
@@ -59,8 +59,8 @@ try {
 
 ```java
 try {
-  // get value.
-  int sInt = (int) ReflectUtils.inject(Target.class)
+  // 读取。
+  int sInt = Reflect.with(Target.class).injector()
       .field("sInt")
       .get();
 } catch (Exception ignore) {}
@@ -70,11 +70,10 @@ try {
 
 ```java
 try {
-  // call method.
-  int hashCode = (int) ReflectUtils.invoke(target)
-    .method("getNumber")
-    .paramsType(Target.class)
-    .invoke(target);
+  int hashCode = Reflect.with(target).invoker()
+      .method("getNumber")
+      .paramsType(Target.class)
+      .invoke(target);
 } catch (Exception ignore) {}
 ```
 
@@ -82,16 +81,9 @@ try {
 
 ```java
 try {
-  // call static method.
-  String str = (String) ReflectUtils.invoke(Target.class)
-    .method("getStr")
-    .invoke();
+  String str = Reflect.with(Target.class).invoker()
+      .method("getStr")
+      .invoke();
 } catch (Exception ignore) {}
-```
-
-- 可回收内部的工具实例，Just an object。
-
-```java
-ReflectUtils.recycle();
 ```
 
