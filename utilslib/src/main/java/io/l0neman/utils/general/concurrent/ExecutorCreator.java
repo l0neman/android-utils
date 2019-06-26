@@ -40,24 +40,6 @@ public class ExecutorCreator {
   private static final int IO_POOL_SIZE = CORE_NUMBER * 2 + 1;
   /** 默认的线程空闲时间（秒） */
   private static final long DEFAULT_KEEP_ALIVE_TIME = 30L;
-  /** 工具的单例对象（for 链式调用） */
-  private static ThreadLocal<Creator> sCreatorInstance;
-
-  /* 申请单例对象 */
-  private static Creator apply() {
-    if (sCreatorInstance == null) {
-      sCreatorInstance = new ThreadLocal<>();
-    }
-
-    Creator creator = sCreatorInstance.get();
-    if (creator == null) {
-      creator = new Creator();
-      return creator;
-    }
-
-    creator.clear();
-    return creator;
-  }
 
   /**
    * IO 密集型，核心线程为 CPU 数，最大线程数为 CPU * 2 + 1。
@@ -65,7 +47,7 @@ public class ExecutorCreator {
    * 线程优先级增加，优先处理，让出 CPU 时间。
    */
   public static Creator io() {
-    return apply()
+    return new Creator()
         .coreSize(CORE_NUMBER)
         .maxPoolSize(IO_POOL_SIZE)
         .keepAliveTime(DEFAULT_KEEP_ALIVE_TIME, TimeUnit.SECONDS)
@@ -77,7 +59,7 @@ public class ExecutorCreator {
    * 计算密集型，核心线程为 CPU 数，最大线程数为 CPU + 1。
    */
   public static Creator compute() {
-    return apply()
+    return new Creator()
         .coreSize(CORE_NUMBER)
         .maxPoolSize(COMPUTE_POOL_SIZE)
         .keepAliveTime(DEFAULT_KEEP_ALIVE_TIME, TimeUnit.SECONDS)
@@ -91,11 +73,11 @@ public class ExecutorCreator {
    * 参考 {@link Executors#newCachedThreadPool()}
    */
   public static Creator lite() {
-    return apply()
+    return new Creator()
         .coreSize(0)
         .maxPoolSize(Integer.MAX_VALUE)
         .keepAliveTime(60L, TimeUnit.SECONDS)
-        .workQueue(new SynchronousQueue<>())
+        .workQueue(new SynchronousQueue<Runnable>())
         .threadLabel("lite")
         .threadPriority(Thread.NORM_PRIORITY - 1);
   }
@@ -106,10 +88,10 @@ public class ExecutorCreator {
    * 参考 {@link Executors#newSingleThreadExecutor()}
    */
   public static Creator single() {
-    return apply()
+    return new Creator()
         .coreSize(1)
         .maxPoolSize(1)
-        .workQueue(new LinkedBlockingQueue<>())
+        .workQueue(new LinkedBlockingQueue<Runnable>())
         .threadLabel("single")
         .threadPriority(Thread.NORM_PRIORITY);
   }
@@ -118,7 +100,7 @@ public class ExecutorCreator {
    * 自定义。
    */
   public static Creator custom() {
-    return apply();
+    return new Creator();
   }
 
   /**

@@ -80,7 +80,6 @@ public final class CommandExecutor implements ICommandExecutor {
   }
 
   @Override public void readAsync(final Callback callback) {
-    //noinspection Convert2Lambda
     final CommandExecutor ce = this;
     exec.execute(new Runnable() {
       @Override
