@@ -1,8 +1,20 @@
 # MyPublicTools
 
-一些工具类  :smile:
+工具类的说明文档和类在同一层目录，命名为 desc_xxx_xxx。😭
 
-写了一些工具类，说明文档和类在同一层目录，命名为 desc_xxx_xxx。
+(接口抽象能力很重要，希望能够提高此能力)。
+
+- [adapter(适配器工具)](#adapter-适配器工具)
+- [anim(动画工具)](#anim-动画工具)
+- [app(应用程序)](#app-应用程序)
+- [general(通用处理)](#general-通用处理)
+  - [storage(存储工具)](#storage-存储工具)
+  - [file(文件工具)](#file-文件工具)
+  - [io(IO 工具)](#io-io-工具)
+  - [concurrent(并发工具)](#concurrent-并发工具)
+  - [simplify(简化操作)](#simplify-简化操作)
+  - [sugar(工具糖)](#sugar-工具糖)
+- [net(网络请求)](#net-网络请求)
 
 ## adapter(适配器工具)
 
@@ -37,6 +49,16 @@
 - 简单存储工具 - 简洁。
 
 [DirStore](./utilslib/src/main/java/io/l0neman/utils/general/storage/desc_dir_store.md)
+
+### file(文件工具)
+
+- 精炼文件工具 - 简单。
+
+[EasyFile](./utilslib/src/main/java/io/l0neman/utils/general/file/desc_easy_file.md)
+
+### io(IO 工具)
+
+[Closer](./utilslib/src/main/java/io/l0neman/utils/general/io/desc_closer.md)
 
 ### concurrent(并发工具)
 
