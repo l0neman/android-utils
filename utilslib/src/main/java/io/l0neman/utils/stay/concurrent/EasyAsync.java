@@ -21,7 +21,7 @@ public class EasyAsync {
     void onResult();
   }
 
-  public static AsyncTask<Void, Void, Void> post(final ExecutorVoid executor) {
+  public static AsyncTask<Void, Void, Void> get(final ExecutorVoid executor) {
     return new AsyncTask<Void, Void, Void>() {
       @Override
       protected Void doInBackground(Void... voids) {
@@ -33,7 +33,7 @@ public class EasyAsync {
       protected void onPostExecute(Void t) {
         executor.onResult();
       }
-    }.execute();
+    };
   }
 
   public interface Executor<T> {
@@ -42,7 +42,7 @@ public class EasyAsync {
     void onResult(T result);
   }
 
-  public static <T> AsyncTask<Void, Void, T> post(final Executor<T> executor) {
+  public static <T> AsyncTask<Void, Void, T> get(final Executor<T> executor) {
     return new AsyncTask<Void, Void, T>() {
       @Override
       protected T doInBackground(Void... voids) {
@@ -53,7 +53,7 @@ public class EasyAsync {
       protected void onPostExecute(T t) {
         executor.onResult(t);
       }
-    }.execute();
+    };
   }
 
   public interface ExecutorWeakVoid<W> {
@@ -62,7 +62,7 @@ public class EasyAsync {
     void onResult(W ref);
   }
 
-  public static <W> AsyncTask<Void, Void, Void> post(W w, final ExecutorWeakVoid<W> executor) {
+  public static <W> AsyncTask<Void, Void, Void> get(W w, final ExecutorWeakVoid<W> executor) {
     final WeakReference<W> wRef = new WeakReference<>(w);
     return new AsyncTask<Void, Void, Void>() {
       @Override
@@ -82,7 +82,7 @@ public class EasyAsync {
           executor.onResult(ref);
         }
       }
-    }.execute();
+    };
 
 
   }
@@ -93,7 +93,7 @@ public class EasyAsync {
     void onResult(W ref, T result);
   }
 
-  public static <W, T> AsyncTask<Void, Void, T> post(W w, final ExecutorWeak<W, T> executor) {
+  public static <W, T> AsyncTask<Void, Void, T> get(W w, final ExecutorWeak<W, T> executor) {
     final WeakReference<W> wRef = new WeakReference<>(w);
     return new AsyncTask<Void, Void, T>() {
       @Override
@@ -113,6 +113,6 @@ public class EasyAsync {
           executor.onResult(w, t);
         }
       }
-    }.execute();
+    };
   }
 }
