@@ -20,9 +20,16 @@ public class Reflect {
         }
       };
 
+  public static Reflect with(String providerClass) {
+    try {
+      return with(Compat.classForName(providerClass));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public static Reflect with(Object targetObject) {
     final Reflect reflectNew = sThreadState.get();
-    //noinspection ConstantConditions - Impossible to be null.
     reflectNew.providerClass = targetObject.getClass();
     reflectNew.targetObject = targetObject;
     return reflectNew;
@@ -30,7 +37,6 @@ public class Reflect {
 
   public static Reflect with(Class<?> providerClass) {
     final Reflect reflectNew = sThreadState.get();
-    //noinspection ConstantConditions - Impossible to be null.
     reflectNew.providerClass = providerClass;
     reflectNew.targetObject = null;
     return reflectNew;
@@ -44,8 +50,27 @@ public class Reflect {
     return new Invoker();
   }
 
-  public final class Injector {
+  public abstract class ReflectUtils {
+    public ReflectUtils providerClass(String providerClass) {
+      try {
+        return providerClass(Compat.classForName(providerClass));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
 
+    public ReflectUtils providerClass(Class<?> providerClass) {
+      Reflect.this.providerClass = providerClass;
+      return this;
+    }
+
+    public ReflectUtils targetObject(Object targetObject) {
+      Reflect.this.targetObject = targetObject;
+      return this;
+    }
+  }
+
+  public final class Injector extends ReflectUtils {
     private String fieldName;
 
     public Injector field(String name) {
@@ -53,20 +78,21 @@ public class Reflect {
       return this;
     }
 
-    public void providerClass(Class<?> providerClass) {
-      Reflect.this.providerClass = providerClass;
+    public Injector providerClass(String providerClass) {
+      super.providerClass(providerClass);
+      return this;
     }
 
-    public void targetObject(Object targetObject) {
-      Reflect.this.targetObject = targetObject;
+    public Injector providerClass(Class<?> providerClass) {
+      super.providerClass(providerClass);
+      return this;
     }
 
-    /**
-     * Sets the value for the target field.
-     *
-     * @throws Exception {@link NoSuchFieldException} or {@link IllegalAccessException} or
-     *                   {@link ReflectiveOperationException}
-     */
+    public Injector targetObject(Object targetObject) {
+      super.targetObject(targetObject);
+      return this;
+    }
+
     public void set(Object value) throws Exception {
       Field field = Compat.need() ?
           Compat.classGetDeclaredField(providerClass, fieldName) :
@@ -76,12 +102,6 @@ public class Reflect {
       field.set(targetObject, value);
     }
 
-    /**
-     * Gets the value of the target.
-     *
-     * @throws Exception {@link NoSuchFieldException} or {@link IllegalAccessException} or
-     *                   {@link ReflectiveOperationException}
-     */
     public <T> T get() throws Exception {
       Field field = Compat.need() ?
           Compat.classGetDeclaredField(providerClass, fieldName) :
@@ -94,16 +114,23 @@ public class Reflect {
 
   }
 
-  public final class Invoker {
+  public final class Invoker extends ReflectUtils {
     private String methodName;
     private Class<?>[] paramsTypes;
 
-    public void providerClass(Class<?> providerClass) {
-      Reflect.this.providerClass = providerClass;
+    public Invoker providerClass(String providerClass) {
+      super.providerClass(providerClass);
+      return this;
     }
 
-    public void targetObject(Object targetObject) {
-      Reflect.this.targetObject = targetObject;
+    public Invoker providerClass(Class<?> providerClass) {
+      super.providerClass(providerClass);
+      return this;
+    }
+
+    public Invoker targetObject(Object targetObject) {
+      super.targetObject(targetObject);
+      return this;
     }
 
     /**
@@ -128,15 +155,6 @@ public class Reflect {
       return this;
     }
 
-    /**
-     * Call the target method.
-     *
-     * @param params method's params
-     * @return method result
-     *
-     * @throws Exception {@link NoSuchFieldException} or {@link IllegalAccessException} or
-     *                   {@link InvocationTargetException} or {@link ReflectiveOperationException}
-     */
     public <T> T invoke(Object... params) throws Exception {
       Method targetMethod = Compat.need() ?
           Compat.classGetDeclaredMethod(providerClass, methodName, paramsTypes) :
@@ -151,6 +169,7 @@ public class Reflect {
   private static final class Compat {
     private static Method sClassGetDeclaredField;
     private static Method sClassGetDeclaredMethod;
+    private static Method sClassForName;
 
     static {
       try {
@@ -164,6 +183,12 @@ public class Reflect {
       } catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
       }
+
+      try {
+        sClassForName = Class.class.getMethod("forName", String.class);
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     static boolean need() {
@@ -171,6 +196,10 @@ public class Reflect {
     }
 
     // 兼容 android P 禁止调用私有 api，间接使用系统类型调用私有 api。
+    private static Class<?> classForName(String classNam) throws Exception {
+      return (Class<?>) sClassForName.invoke(null, classNam);
+    }
+
     private static Field classGetDeclaredField(Class<?> clazz, String fieldName) throws Exception {
       return (Field) sClassGetDeclaredField.invoke(clazz, fieldName);
     }
