@@ -83,6 +83,12 @@ public class ZipUtils {
     IOUtils.transfer(zipIs, out, true);
   }
 
+  public static InputStream openEntryStream(ZipFile zip, String entryName)
+      throws IOException {
+    ZipEntry entry = new ZipEntry(entryName);
+    return zip.getInputStream(entry);
+  }
+
   /**
    * Extract a single entry to the specified file.
    *

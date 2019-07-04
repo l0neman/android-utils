@@ -58,6 +58,8 @@
 
 ### io(IO 工具)
 
+- 关闭工具
+
 [Closer](./utilslib/src/main/java/io/l0neman/utils/general/io/desc_closer.md)
 
 ### concurrent(并发工具)
@@ -72,7 +74,7 @@
 
 [CommandExecutor](./utilslib/src/main/java/io/l0neman/utils/general/simplify/desc_command_executor.md)
 
-### sugar(工具糖)
+### sugar(糖)
 
 - 反射工具 - 简洁，链式。
 
