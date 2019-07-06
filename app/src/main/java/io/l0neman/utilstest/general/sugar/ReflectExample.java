@@ -30,9 +30,8 @@ public class ReflectExample {
     } catch (Exception e) {
       /* 如果需要判断异常类型 */
       if (e instanceof NoSuchFieldException) {
-      } else
-        if (e instanceof IllegalAccessException) {
-        } else { throw new AssertionError("UNKNOWN ERROR."); }
+      } else if (e instanceof IllegalAccessException) {
+      } else { throw new AssertionError("UNKNOWN ERROR."); }
     }
 
     try {
@@ -59,7 +58,7 @@ public class ReflectExample {
     try {
       int hashCode = Reflect.with(target).invoker()
           .method("getNumber")
-          .paramsType(Target.class)
+          .parameterTypes(Target.class)
           .invoke(target);
     } catch (Exception ignore) {}
 

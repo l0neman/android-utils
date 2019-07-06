@@ -3,7 +3,6 @@ package io.l0neman.utils.general.sugar;
 import android.os.Build;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -30,6 +29,7 @@ public class Reflect {
 
   public static Reflect with(Object targetObject) {
     final Reflect reflectNew = sThreadState.get();
+    //noinspection ConstantConditions [not null]
     reflectNew.providerClass = targetObject.getClass();
     reflectNew.targetObject = targetObject;
     return reflectNew;
@@ -37,6 +37,7 @@ public class Reflect {
 
   public static Reflect with(Class<?> providerClass) {
     final Reflect reflectNew = sThreadState.get();
+    //noinspection ConstantConditions [not null]
     reflectNew.providerClass = providerClass;
     reflectNew.targetObject = null;
     return reflectNew;
@@ -116,7 +117,7 @@ public class Reflect {
 
   public final class Invoker extends ReflectUtils {
     private String methodName;
-    private Class<?>[] paramsTypes;
+    private Class<?>[] parameterTypes;
 
     public Invoker providerClass(String providerClass) {
       super.providerClass(providerClass);
@@ -147,18 +148,18 @@ public class Reflect {
     /**
      * Sets the type of the method's arguments.
      *
-     * @param paramsTypes methods params types.
+     * @param parameterTypes methods params types.
      * @return self
      */
-    public Invoker paramsType(Class<?>... paramsTypes) {
-      this.paramsTypes = paramsTypes;
+    public Invoker parameterTypes(Class<?>... parameterTypes) {
+      this.parameterTypes = parameterTypes;
       return this;
     }
 
     public <T> T invoke(Object... params) throws Exception {
       Method targetMethod = Compat.need() ?
-          Compat.classGetDeclaredMethod(providerClass, methodName, paramsTypes) :
-          providerClass.getDeclaredMethod(methodName, paramsTypes);
+          Compat.classGetDeclaredMethod(providerClass, methodName, parameterTypes) :
+          providerClass.getDeclaredMethod(methodName, parameterTypes);
       targetMethod.setAccessible(true);
 
       //noinspection unchecked - throw cast exception.
