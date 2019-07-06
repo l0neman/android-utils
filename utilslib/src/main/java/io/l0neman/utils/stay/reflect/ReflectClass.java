@@ -46,9 +46,11 @@ public abstract class ReflectClass {
 
   static {
     try {
+      sReflectFieldConstructorForInstanceMap.put(ReflectField.class, ReflectField.class.getConstructor(Class.class, Object.class, String.class));
       sReflectFieldConstructorForInstanceMap.put(ObjectReflectField.class, ObjectReflectField.class.getConstructor(Class.class, Object.class, String.class));
       sReflectFieldConstructorForInstanceMap.put(IntReflectField.class, IntReflectField.class.getConstructor(Class.class, Object.class, String.class));
 
+      sReflectFieldConstructorForClassMap.put(ReflectField.class, ReflectField.class.getConstructor(Class.class, String.class));
       sReflectFieldConstructorForClassMap.put(ObjectReflectField.class, ObjectReflectField.class.getConstructor(Class.class, String.class));
       sReflectFieldConstructorForClassMap.put(IntReflectField.class, IntReflectField.class.getConstructor(Class.class, String.class));
     } catch (NoSuchMethodException e) {
@@ -110,32 +112,60 @@ public abstract class ReflectClass {
     }
   }
 
+  private static Class<?> getTargetMirrorClass(Class<? extends ReflectClass> mirrorClass) throws ReflectException {
+    final MirrorClassName mirrorClassName = mirrorClass.getAnnotation(MirrorClassName.class);
+    if (mirrorClassName == null) {
+      throw new ReflectException("not get mirror class name");
+    }
+
+    return Reflect.with(mirrorClassName.value()).getProviderClass();
+  }
+
+  // init instance members and static members.
   public static <T extends ReflectClass> T mirror(Object targetMirrorObject, Class<T> mirrorClass)
       throws ReflectException {
     try {
       T mirrorObject = mirrorClass.newInstance();
 
-      final MirrorClassName mirrorClassName = mirrorClass.getAnnotation(MirrorClassName.class);
-      if (mirrorClassName == null) {
-        throw new ReflectException("not get mirror class name");
-      }
-
-      Class<?> targetMirrorClass = Reflect.with(mirrorClassName.value()).getProviderClass();
+      Class<?> targetMirrorClass = getTargetMirrorClass(mirrorClass);
 
       // init reflect fields.
       for (Field field : mirrorClass.getDeclaredFields()) {
+
         if (Modifier.isStatic(field.getModifiers())) {
+          // for ReflectClass.
+          if (ReflectClass.class.isAssignableFrom(field.getType())) {
+
+            field.set(mirrorObject, ReflectClass.mirror(
+                Reflect.with(targetMirrorClass).injector().field(field.getName()).get(),
+                (Class<? extends ReflectClass>) field.getType()
+            ));
+
+            continue;
+          }
+
+          // for ReflectField.
           final Constructor<? extends ReflectField> constructor = sReflectFieldConstructorForClassMap.get(field.getType());
-          System.out.println("mirror static field: " + targetMirrorClass + ", " + targetMirrorObject + ", " +
-              field.getName());
-
           field.set(mirrorObject, constructor.newInstance(targetMirrorClass, field.getName()));
-        } else {
-          final Constructor<? extends ReflectField> constructor = sReflectFieldConstructorForInstanceMap.get(field.getType());
-          System.out.println("mirror field: " + targetMirrorClass + ", " + field.getName());
 
-          field.set(mirrorObject, constructor.newInstance(targetMirrorClass, targetMirrorObject, field.getName()));
+          continue;
         }
+
+        // for ReflectClass.
+        if (ReflectClass.class.isAssignableFrom(field.getType())) {
+          final Class<?> fieldTargetMirrorClass = getTargetMirrorClass((Class<? extends ReflectClass>) field.getType());
+
+          field.set(mirrorObject, ReflectClass.mirror(
+              Reflect.with(targetMirrorClass).injector().targetObject(targetMirrorObject).field(field.getName()).get(),
+              (Class<? extends ReflectClass>) field.getType()
+          ));
+
+          continue;
+        }
+
+        // for ReflectField.
+        final Constructor<? extends ReflectField> constructor = sReflectFieldConstructorForInstanceMap.get(field.getType());
+        field.set(mirrorObject, constructor.newInstance(targetMirrorClass, targetMirrorObject, field.getName()));
       }
 
       // init reflect methods.
@@ -148,29 +178,27 @@ public abstract class ReflectClass {
         String methodSignature = getMethodSignature(method.getName(), method.getParameterTypes());
 
         if (Modifier.isStatic(method.getModifiers())) {
-          System.out.println();
-
-          System.out.println("mirror static method: " + targetMirrorClass + ", " + method.getName() + ", " +
-              Arrays.toString(method.getParameterTypes()));
-
           reflectMethodMap.put(methodSignature, sReflectMethodConstructorForClass.newInstance(
               targetMirrorClass, method.getName(), method.getParameterTypes()
           ));
-        } else {
 
-          System.out.println("mirror method: " + targetMirrorClass + ", " +
-              targetMirrorObject + ", " + method.getName() + ", " + Arrays.toString(method.getParameterTypes()));
-
-          reflectMethodMap.put(methodSignature, sReflectMethodConstructorForInstance.newInstance(
-              targetMirrorClass, targetMirrorObject, method.getName(), method.getParameterTypes()
-          ));
+          continue;
         }
-      }
-      sMirrorClassMethodInfo.put(mirrorClass, reflectMethodMap);
 
+        reflectMethodMap.put(methodSignature, sReflectMethodConstructorForInstance.newInstance(
+            targetMirrorClass, targetMirrorObject, method.getName(), method.getParameterTypes()
+        ));
+      }
+
+      sMirrorClassMethodInfo.put(mirrorClass, reflectMethodMap);
       return mirrorObject;
     } catch (Exception e) {
       throw new ReflectException("mirror", e);
     }
+  }
+
+  // mirror static members.
+  public static void mirrorStaticMembers(Class<? extends ReflectClass> mirrorClass) throws ReflectException {
+    mirror(null, mirrorClass);
   }
 }

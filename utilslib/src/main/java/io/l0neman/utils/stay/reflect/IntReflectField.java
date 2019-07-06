@@ -19,6 +19,6 @@ public class IntReflectField extends ReflectField {
   }
 
   public int get() throws ReflectException {
-    return super.getValue();
+    return (int) super.getValue();
   }
 }

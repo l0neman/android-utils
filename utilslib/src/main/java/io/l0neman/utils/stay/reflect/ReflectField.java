@@ -6,7 +6,7 @@ import io.l0neman.utils.stay.reflect.util.Reflect;
 /**
  * Created by l0neman on 2019/07/06.
  */
-public abstract class ReflectField {
+public class ReflectField<T> {
 
   private Class<?> mClass;
   private Object mObject;
@@ -25,7 +25,7 @@ public abstract class ReflectField {
     this.mName = mName;
   }
 
-  public <T> T getValue() throws ReflectException {
+  public T getValue() throws ReflectException {
     try {
       return Reflect.with(mClass).injector()
           .targetObject(mObject)
