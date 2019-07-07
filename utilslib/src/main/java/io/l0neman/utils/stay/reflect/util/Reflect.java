@@ -1,5 +1,7 @@
 package io.l0neman.utils.stay.reflect.util;
 
+import android.os.Build;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -12,15 +14,14 @@ public class Reflect {
   private Object targetObject;
   private static ThreadLocal<Reflect> sThreadState =
       new ThreadLocal<Reflect>() {
-        @Override
-        protected Reflect initialValue() {
+        @Override protected Reflect initialValue() {
           return new Reflect();
         }
       };
 
   public static Reflect with(String providerClass) {
     try {
-      return with(Class.forName(providerClass));
+      return with(Compat.classForName(providerClass));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -28,6 +29,7 @@ public class Reflect {
 
   public static Reflect with(Object targetObject) {
     final Reflect reflectNew = sThreadState.get();
+    // noinspection ConstantConditions [ensure not null].
     reflectNew.providerClass = targetObject.getClass();
     reflectNew.targetObject = targetObject;
     return reflectNew;
@@ -35,6 +37,7 @@ public class Reflect {
 
   public static Reflect with(Class<?> providerClass) {
     final Reflect reflectNew = sThreadState.get();
+    // noinspection ConstantConditions [ensure not null].
     reflectNew.providerClass = providerClass;
     reflectNew.targetObject = null;
     return reflectNew;
@@ -55,7 +58,7 @@ public class Reflect {
   public abstract class ReflectUtils {
     public ReflectUtils providerClass(String providerClass) {
       try {
-        return providerClass(Class.forName(providerClass));
+        return providerClass(Compat.classForName(providerClass));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -96,17 +99,19 @@ public class Reflect {
     }
 
     public void set(Object value) throws Exception {
-      Field field = providerClass.getDeclaredField(fieldName);
+      Field field = Compat.need() ?
+          Compat.classGetDeclaredField(providerClass, fieldName) :
+          providerClass.getDeclaredField(fieldName);
       field.setAccessible(true);
-
       field.set(targetObject, value);
     }
 
     public <T> T get() throws Exception {
-      Field field = providerClass.getDeclaredField(fieldName);
+      Field field = Compat.need() ?
+          Compat.classGetDeclaredField(providerClass, fieldName) :
+          providerClass.getDeclaredField(fieldName);
       field.setAccessible(true);
-
-      //noinspection unchecked - throw cast exception.
+      // noinspection unchecked - throw cast exception.
       return (T) field.get(targetObject);
     }
 
@@ -154,11 +159,57 @@ public class Reflect {
     }
 
     public <T> T invoke(Object... params) throws Exception {
-      Method targetMethod = providerClass.getDeclaredMethod(methodName, paramsTypes);
+      Method targetMethod = Compat.need() ?
+          Compat.classGetDeclaredMethod(providerClass, methodName, paramsTypes) :
+          providerClass.getDeclaredMethod(methodName, paramsTypes);
       targetMethod.setAccessible(true);
 
       //noinspection unchecked - throw cast exception.
       return (T) targetMethod.invoke(targetObject, params);
+    }
+  }
+
+  private static final class Compat {
+    private static Method sClassGetDeclaredField;
+    private static Method sClassGetDeclaredMethod;
+    private static Method sClassForName;
+
+    static {
+      try {
+        sClassGetDeclaredField = Class.class.getMethod("getDeclaredField", String.class);
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      }
+
+      try {
+        sClassGetDeclaredMethod = Class.class.getMethod("getDeclaredMethod", String.class, Class[].class);
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      }
+
+      try {
+        sClassForName = Class.class.getMethod("forName", String.class);
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    static boolean need() {
+      return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P;
+    }
+
+    private static Class<?> classForName(String classNam) throws Exception {
+      return (Class<?>) sClassForName.invoke(null, classNam);
+    }
+
+    // 兼容 android P 禁止调用私有 api，间接使用系统类型调用私有 api。
+    private static Field classGetDeclaredField(Class<?> clazz, String fieldName) throws Exception {
+      return (Field) sClassGetDeclaredField.invoke(clazz, fieldName);
+    }
+
+    private static Method classGetDeclaredMethod(Class<?> clazz, String fieldName,
+                                                 Class<?>[] parameterTypes) throws Exception {
+      return (Method) sClassGetDeclaredMethod.invoke(clazz, fieldName, parameterTypes);
     }
   }
 }

@@ -1,4 +1,4 @@
-package io.l0neman.utils.stay.reflect.annoation;
+package io.l0neman.utils.stay.reflect.mirror.annoation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Created by l0neman on 2019/07/06.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface MethodParameterTypes {
-  Class<?>[] value();
+@Target(ElementType.TYPE)
+public @interface MirrorClassName {
+  String value();
 }

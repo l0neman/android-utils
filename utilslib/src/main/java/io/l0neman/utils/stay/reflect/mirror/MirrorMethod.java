@@ -1,12 +1,9 @@
-package io.l0neman.utils.stay.reflect;
-
-import io.l0neman.utils.stay.reflect.throwable.ReflectException;
-import io.l0neman.utils.stay.reflect.util.Reflect;
+package io.l0neman.utils.stay.reflect.mirror;
 
 /**
  * Created by l0neman on 2019/07/06.
  */
-public class ReflectMethod {
+public class  MirrorMethod {
 
   public Class<?> mClass;
   public Object mObject;
@@ -14,7 +11,7 @@ public class ReflectMethod {
   public Class<?>[] mParameterTypes;
 
   // for object's field.
-  public ReflectMethod(Class<?> mClass, Object mObject, String mName, Class<?>[] mParameterTypes) {
+  public MirrorMethod(Class<?> mClass, Object mObject, String mName, Class<?>[] mParameterTypes) {
     this.mClass = mClass;
     this.mObject = mObject;
     this.mName = mName;
@@ -22,12 +19,13 @@ public class ReflectMethod {
   }
 
   // for class's static field.
-  public ReflectMethod(Class<?> mClass, String mName, Class<?>[] mParameterTypes) {
+  public MirrorMethod(Class<?> mClass, String mName, Class<?>[] mParameterTypes) {
     this.mClass = mClass;
     this.mName = mName;
     this.mParameterTypes = mParameterTypes;
   }
 
+  /*
   public Object invoke(Object... args) throws ReflectException {
     try {
       return Reflect.with(mClass).invoker()
@@ -39,4 +37,5 @@ public class ReflectMethod {
       throw new ReflectException(e);
     }
   }
+  // */
 }
