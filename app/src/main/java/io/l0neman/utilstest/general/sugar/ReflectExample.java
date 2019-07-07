@@ -1,6 +1,6 @@
 package io.l0neman.utilstest.general.sugar;
 
-import io.l0neman.utils.general.sugar.Reflect;
+import io.l0neman.utils.general.reflect;
 
 public class ReflectExample {
 

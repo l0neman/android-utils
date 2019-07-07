@@ -1,4 +1,4 @@
-package io.l0neman.utils.general.sugar;
+package io.l0neman.utils.general.reflect;
 
 import android.os.Build;
 

@@ -74,11 +74,11 @@
 
 [CommandExecutor](./utilslib/src/main/java/io/l0neman/utils/general/simplify/desc_command_executor.md)
 
-### sugar(糖)
+### reflect(反射)
 
 - 反射工具 - 简洁，链式。
 
-[Reflect](./utilslib/src/main/java/io/l0neman/utils/general/sugar/desc_reflect_utils.md)
+[Reflect](./utilslib/src/main/java/io/l0neman/utils/general/reflect/desc_reflect_utils.md)
 
 ## net(网络请求)
 

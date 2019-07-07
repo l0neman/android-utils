@@ -1,4 +1,4 @@
-package io.l0neman.utils.stay.io;
+package io.l0neman.utils.stay.reflect.io;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
