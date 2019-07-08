@@ -1,4 +1,4 @@
-package io.l0neman.utils.stay.reflect.file;
+package io.l0neman.utils.stay.file;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,6 +1,6 @@
 package io.l0neman.utilstest.general.sugar;
 
-import io.l0neman.utils.general.reflect;
+import io.l0neman.utils.general.reflect.Reflect;
 
 public class ReflectExample {
 
@@ -20,7 +20,7 @@ public class ReflectExample {
   public void test() {
     Target target = new Target();
 
-//    /* 1-1. 操作对象的成员变量 */
+    //    /* 1-1. 操作对象的成员变量 */
     try {
       // 注入。
       Reflect.with(target).injector()
@@ -30,8 +30,9 @@ public class ReflectExample {
     } catch (Exception e) {
       /* 如果需要判断异常类型 */
       if (e instanceof NoSuchFieldException) {
-      } else if (e instanceof IllegalAccessException) {
-      } else { throw new AssertionError("UNKNOWN ERROR."); }
+      } else
+        if (e instanceof IllegalAccessException) {
+        } else { throw new AssertionError("UNKNOWN ERROR."); }
     }
 
     try {
