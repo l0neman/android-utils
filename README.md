@@ -1,88 +1,110 @@
 # MyPublicTools
 
+- [adapter](#adapter)
+- [anim](#anim)
+- [app](#app)
+- [general](#general)
+  - [storage](#storage)
+  - [file](#file)
+  - [io](#io)
+  - [concurrent](#concurrent)
+  - [simplify](#simplify)
+  - [reflect](#reflect)
+- [net](#net)
+
 工具类的说明文档和类在同一层目录，命名为 desc_xxx_xxx。😭
 
-(接口抽象能力很重要，希望能够提高此能力)。
+接口抽象能力很重要，希望能够提高此能力。
 
-- [adapter(适配器工具)](#adapter-适配器工具)
-- [anim(动画工具)](#anim-动画工具)
-- [app(应用程序)](#app-应用程序)
-- [general(通用处理)](#general-通用处理)
-  - [storage(存储工具)](#storage-存储工具)
-  - [file(文件工具)](#file-文件工具)
-  - [io(IO 工具)](#io-io-工具)
-  - [concurrent(并发工具)](#concurrent-并发工具)
-  - [simplify(简化操作)](#simplify-简化操作)
-  - [sugar(工具糖)](#sugar-工具糖)
-- [net(网络请求)](#net-网络请求)
+## adapter
 
-## adapter(适配器工具)
+适配器相关
 
-- ListView Adapter - 简洁。
+- ListView Adapter
 
 [BaseLvAdapter](./utilslib/src/main/java/io/l0neman/utils/adapter/desc_base_lvadapter.md)
 
-- RecyclerView Adapter - 简洁。
+- RecyclerView Adapter
 
 [BaseRvAdapter](./utilslib/src/main/java/io/l0neman/utils/adapter/desc_base_rvadapter.md)
 
-- RecyclerView Adapter - 可添加首尾布局。
+- RecyclerView Adapter - 首尾布局。
 
 [HeaderRvAdapter](./utilslib/src/main/java/io/l0neman/utils/adapter/desc_header_rvadapter.md)
 
-## anim(动画工具)
+## anim
 
-- 动画创建器 - 简洁，链式。
+动画相关
+
+- 动画创建器 - 链式。
 
 [AnimatorCreator](./utilslib/src/main/java/io/l0neman/utils/anim/desc_animator_creator.md)
 
-## app(应用程序)
+## app
 
-- 权限申请工具 - 简单，方便。
+应用相关
+
+- 权限申请工具
 
 [Permission](./utilslib/src/main/java/io/l0neman/utils/app/desc_permission_utils.md)
 
-## general(通用处理)
+## general
 
-### storage(存储工具)
+通用工具
 
-- 简单存储工具 - 简洁。
+### storage
+
+存储相关
+
+- 简单存储工具
 
 [DirStore](./utilslib/src/main/java/io/l0neman/utils/general/storage/desc_dir_store.md)
 
-### file(文件工具)
+### file
 
-- 精炼文件工具 - 简单。
+文件相关
+
+- 文件工具
 
 [EasyFile](./utilslib/src/main/java/io/l0neman/utils/general/file/desc_easy_file.md)
 
-### io(IO 工具)
+### io
+
+输入输出相关
 
 - 关闭工具
 
 [Closer](./utilslib/src/main/java/io/l0neman/utils/general/io/desc_closer.md)
 
-### concurrent(并发工具)
+### concurrent
 
-- 线程池构建器 - 简洁，链式。
+并发相关
+
+- 线程池构建器 - 链式。
 
 [ExecutorCreator](./utilslib/src/main/java/io/l0neman/utils/general/concurrent/desc_executor_creator.md)
 
-### simplify(简化操作)
+### simplify
 
-- 命令执行工具 - 简单。
+简化相关操作
+
+- 命令执行工具
 
 [CommandExecutor](./utilslib/src/main/java/io/l0neman/utils/general/simplify/desc_command_executor.md)
 
-### reflect(反射)
+### reflect
 
-- 反射工具 - 简洁，链式。
+反射相关
+
+- 反射工具 - 链式。
 
 [Reflect](./utilslib/src/main/java/io/l0neman/utils/general/reflect/desc_reflect_utils.md)
 
-## net(网络请求)
+## net
 
-- 网络请求工具 - 基础。
+网络请求相关
+
+- 网络请求工具
 
 [HttpUtils](./utilslib/src/main/java/io/l0neman/utils/net/desc_http_utils.md)
 
