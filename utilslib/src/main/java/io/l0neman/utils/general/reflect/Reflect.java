@@ -34,7 +34,7 @@ public class Reflect {
   }
 
   private void ensureClean() {
-    if (mClass == null && mObject == null) {
+    if (mClass != null || mObject != null) {
       throw new UnsupportedOperationException("It is not allowed to use \"with\" after \"with\".");
     }
   }
@@ -77,13 +77,13 @@ public class Reflect {
 
   public static Injector with(Field field) {
     final Injector injector = new Injector();
-    injector.field = field;
+    injector.mField = field;
     return injector;
   }
 
   public static Invoker with(Method method) {
     final Invoker invoker = new Invoker();
-    invoker.method = method;
+    invoker.mMethod = method;
     return invoker;
   }
 
@@ -112,6 +112,7 @@ public class Reflect {
   }
 
   public final Class<?> getClazz() {
+    clean();
     return mClass;
   }
 
@@ -159,13 +160,13 @@ public class Reflect {
   }
 
   public final static class Injector extends Reflect {
-    private Field field;
-    private String fieldName;
+    private Field mField;
+    private String mFieldName;
 
     private Injector() {}
 
     public Injector field(String name) {
-      this.fieldName = name;
+      this.mFieldName = name;
       return this;
     }
 
@@ -176,8 +177,8 @@ public class Reflect {
 
     public void set(Object value) throws ReflectException {
       try {
-        if (field != null) {
-          field.set(mObject, value);
+        if (mField != null) {
+          mField.set(mObject, value);
           return;
         }
 
@@ -190,11 +191,26 @@ public class Reflect {
       }
     }
 
-    public <T> T get() throws Exception {
+    public Field getField() throws ReflectException {
       try {
-        if (field != null) {
+        if (mField != null) {
+          return mField;
+        }
+
+        Field field = getDeclaredFieldFromClassTree(mClass);
+        field.setAccessible(true);
+
+        return field;
+      } catch (Exception e) {
+        throw new ReflectException("injector get", e);
+      }
+    }
+
+    public <T> T get() throws ReflectException {
+      try {
+        if (mField != null) {
           // noinspection unchecked - throw cast exception.
-          return (T) field.get(mObject);
+          return (T) mField.get(mObject);
         }
 
         Field field = getDeclaredFieldFromClassTree(mClass);
@@ -209,7 +225,7 @@ public class Reflect {
 
     private Field getDeclaredFieldFromClassTree(Class<?> clazz) throws Exception {
       try {
-        return Compat.classGetDeclaredField(clazz, fieldName);
+        return Compat.classGetDeclaredField(clazz, mFieldName);
       } catch (NoSuchFieldException e) {
         Class<?> parent = clazz.getSuperclass();
         if (parent != Object.class) {
@@ -217,26 +233,26 @@ public class Reflect {
         }
       }
 
-      throw new Exception("not found field: " + fieldName + " from class: " + clazz);
+      throw new Exception("not found mField: " + mFieldName + " from class: " + clazz);
     }
 
   }
 
   public final static class Invoker extends Reflect {
-    private Method method;
-    private String methodName;
-    private Class<?>[] paramsTypes;
+    private Method mMethod;
+    private String mMethodName;
+    private Class<?>[] mParamsTypes;
 
     private Invoker() {}
 
     /**
-     * Set the method name.
+     * Set the mMethod name.
      *
-     * @param methodName method"s name
+     * @param methodName mMethod"s name
      * @return self
      */
     public Invoker method(String methodName) {
-      this.methodName = methodName;
+      this.mMethodName = methodName;
       return this;
     }
 
@@ -246,21 +262,36 @@ public class Reflect {
     }
 
     /**
-     * Sets the type of the method's arguments.
+     * Sets the type of the mMethod's arguments.
      *
      * @param paramsTypes methods params types.
      * @return self
      */
     public Invoker paramsType(Class<?>... paramsTypes) {
-      this.paramsTypes = paramsTypes;
+      this.mParamsTypes = paramsTypes;
       return this;
+    }
+
+    public Method getMethod() throws ReflectException {
+      try {
+        if (mMethod != null) {
+          return mMethod;
+        }
+
+        Method targetMethod = getDeclaredMethodFromClassTree(mClass);
+        targetMethod.setAccessible(true);
+
+        return targetMethod;
+      } catch (Exception e) {
+        throw new ReflectException("Invoker invoke", e);
+      }
     }
 
     public <T> T invoke(Object... params) throws ReflectException {
       try {
-        if (method != null) {
+        if (mMethod != null) {
           // noinspection unchecked - throw cast exception.
-          return (T) method.invoke(mObject, params);
+          return (T) mMethod.invoke(mObject, params);
         }
 
         Method targetMethod = getDeclaredMethodFromClassTree(mClass);
@@ -275,7 +306,7 @@ public class Reflect {
 
     private Method getDeclaredMethodFromClassTree(Class<?> clazz) throws Exception {
       try {
-        return Compat.classGetDeclaredMethod(clazz, methodName, paramsTypes);
+        return Compat.classGetDeclaredMethod(clazz, mMethodName, mParamsTypes);
       } catch (NoSuchMethodException e) {
         Class<?> parent = clazz.getSuperclass();
         if (parent != Object.class) {
@@ -283,7 +314,7 @@ public class Reflect {
         }
       }
 
-      throw new Exception("not found method: " + methodName + " from class: " + clazz);
+      throw new Exception("not found mMethod: " + mMethodName + " from class: " + clazz);
     }
   }
 
