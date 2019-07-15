@@ -1,72 +1,106 @@
 package io.l0neman.utilstest.general.sugar;
 
-import io.l0neman.utils.general.reflect;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import io.l0neman.utils.general.reflect.Reflect;
 
 public class ReflectExample {
 
-  private static final class Target {
-    private String str = "123";
-    public static int sInt = 7;
+  private static final class ReflectTarget {
+    private static String strField0 = "class string field.";
+    private String strField1 = "instance string field.";
 
-    private int getNumber(Target target) {
-      return target.hashCode();
+    private ReflectTarget() {}
+
+    public ReflectTarget(String strField) {
+      this.strField1 = strField;
     }
 
-    public static String getStr() {
-      return "testStr";
+    private static String strMethod0(int a, int b) {
+      final String str = "" + a + b;
+      System.out.println(str);
+      return str;
+    }
+
+    private String strMethod1(int a) {
+      final String s = strField0 + a;
+      System.out.println(s);
+      return s;
     }
   }
 
-  public void test() {
-    Target target = new Target();
+  public void test() throws Exception {
+    String targetClassName = "io.l0neman.utils.general.reflect.Reflect$ReflectTarget";
+    ReflectTarget reflectTarget;
+    // 1. creator - 对象创建。
 
-//    /* 1-1. 操作对象的成员变量 */
-    try {
-      // 注入。
-      Reflect.with(target).injector()
-          .field("str")
-          .set("rts");
+    // start with a class.
+    reflectTarget = Reflect.with(ReflectTarget.class).creator()
+        .parameterTypes(String.class)
+        .create("hello");
 
-    } catch (Exception e) {
-      /* 如果需要判断异常类型 */
-      if (e instanceof NoSuchFieldException) {
-      } else if (e instanceof IllegalAccessException) {
-      } else { throw new AssertionError("UNKNOWN ERROR."); }
-    }
+    // start with the class name.
+    reflectTarget = Reflect.with(targetClassName).creator()
+        .parameterTypes(String.class)
+        .create("hello");
 
-    try {
-      // 读取。
-      String str = Reflect.with(target).injector()
-          .field("str")
-          .get();
-    } catch (Exception ignore) {}
+    // wrap java.lang.reflect.Constructor.
+    Constructor<?> constructor = ReflectTarget.class.getConstructor(String.class);
+    reflectTarget = Reflect.with(constructor).create("hello");
 
-    /* 1-2. 操作类的静态成员变量 */
-    try {
-      Reflect.with(Target.class).injector()
-          .field("sInt")
-          .set(2);
-    } catch (Exception ignore) {}
 
-    try {
-      int sInt = Reflect.with(Target.class).injector()
-          .field("sInt")
-          .get();
-    } catch (Exception ignore) {}
+    // 2. invoker - 方法调用。
+    // call object method.
+    String result = Reflect.with(reflectTarget).invoker()
+        .method("strMethod0")
+        .paramsType(int.class)
+        .invoke(1);
 
-    /* 2-1. 操作对象的方法 */
-    try {
-      int hashCode = Reflect.with(target).invoker()
-          .method("getNumber")
-          .parameterTypes(Target.class)
-          .invoke(target);
-    } catch (Exception ignore) {}
+    // call class method.
+    result = Reflect.with(ReflectTarget.class).invoker()
+        .method("strMethod0")
+        .targetObject(reflectTarget)
+        .paramsType(int.class, int.class)
+        .invoke(1, 2);
 
-    /* 2-2. 操作类的静态方法 */
-    try {
-      String str = Reflect.with(Target.class).invoker()
-          .method("getStr")
-          .invoke();
-    } catch (Exception ignore) {}
+    // wrap java.lang.reflect.Method.
+    final Method strMethod1 = ReflectTarget.class.getDeclaredMethod("strMethod1", int.class);
+
+    result = Reflect.with(strMethod1)
+        .paramsType(int.class, int.class)
+        .invoke(1, 2);
+
+    // 3. injector - 成员读写。
+    // set object field.
+    Reflect.with(reflectTarget).injector()
+        .field("strField1")
+        .set("hello1");
+
+    // set class field.
+    Reflect.with(Reflect.class).injector()
+        .field("strField0")
+        .set("hello0");
+
+    // get object field.
+    String strField = Reflect.with(reflectTarget).injector()
+        .field("strField1")
+        .get();
+
+    // get class field.
+    strField = Reflect.with(ReflectTarget.class).injector()
+        .field("strField0")
+        .get();
+
+    // wrap java.lang.reflect.Field.
+    Field strField1 = ReflectTarget.class.getDeclaredField("strField1");
+
+    Reflect.with(strField1).targetObject(reflectTarget).set("hello");
+    Reflect.with(strField1).targetObject(reflectTarget).get();
+
+    // 4. class for name.
+    final Class<?> targetClass = Reflect.with(targetClassName).getClazz();
   }
 }

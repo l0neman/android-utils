@@ -32,7 +32,7 @@ public class MirrorMethod {
     try {
       return Reflect.with(mObject != null ? mObject : mClass).invoker()
           .method(mName)
-          .paramsType(mParameterTypes)
+          .parameterType(mParameterTypes)
           .invoke();
     } catch (Exception e) {
       throw new MirrorException(e);

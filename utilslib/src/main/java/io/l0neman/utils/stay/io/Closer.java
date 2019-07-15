@@ -1,4 +1,4 @@
-package io.l0neman.utils.stay.reflect.io;
+package io.l0neman.utils.stay.io;
 
 import java.io.Closeable;
 import java.io.IOException;

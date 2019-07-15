@@ -125,7 +125,7 @@ public abstract class MirrorClass {
     try {
       return Reflect.with(mirrorMethod.mObject).invoker()
           .method(mirrorMethod.mName)
-          .paramsType(mirrorMethod.mParameterTypes)
+          .parameterType(mirrorMethod.mParameterTypes)
           .invoke(args);
     } catch (Exception e) {
       throw new MirrorException("call method", e);
