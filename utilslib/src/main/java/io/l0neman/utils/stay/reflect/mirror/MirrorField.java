@@ -1,6 +1,8 @@
 package io.l0neman.utils.stay.reflect.mirror;
 
 
+import java.lang.reflect.Field;
+
 import io.l0neman.utils.stay.reflect.Reflect;
 import io.l0neman.utils.stay.reflect.mirror.throwable.MirrorException;
 
@@ -9,39 +11,36 @@ import io.l0neman.utils.stay.reflect.mirror.throwable.MirrorException;
  */
 public class MirrorField<T> {
 
-  private Class<?> mClass;
   private Object mObject;
-  private String mName;
+  private final Field mField;
 
-  // for object's field.
-  public MirrorField(Class<?> mClass, Object mObject, String mName) {
-    this.mClass = mClass;
+  // for object field.
+  public MirrorField(Object mObject, Field mField) {
     this.mObject = mObject;
-    this.mName = mName;
+    this.mField = mField;
   }
 
-  // for class's static field.
-  public MirrorField(Class<?> mClass, String mName) {
-    this.mClass = mClass;
-    this.mName = mName;
+  // for static field.
+  public MirrorField(Field mField) {
+    this.mField = mField;
   }
 
-  public T getValue() throws MirrorException {
+  public void setObject(Object mObject) {
+    this.mObject = mObject;
+  }
+
+  public T get() throws MirrorException {
     try {
-      return Reflect.with(mObject == null ? mClass : mObject).injector()
-          .field(mName)
-          .get();
-    } catch (Exception e) {
+      return Reflect.with(mField).targetObject(mObject).get();
+    } catch (Reflect.ReflectException e) {
       throw new MirrorException("get field value", e);
     }
   }
 
-  public void setValue(Object value) throws MirrorException {
+  public void set(Object value) throws MirrorException {
     try {
-      Reflect.with(mObject == null ? mClass : mObject).injector()
-          .field(mName)
-          .set(value);
-    } catch (Exception e) {
+      Reflect.with(mField).targetObject(mObject).set(value);
+    } catch (Reflect.ReflectException e) {
       throw new MirrorException("get field value", e);
     }
   }

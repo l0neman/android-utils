@@ -1,5 +1,7 @@
 package io.l0neman.utils.stay.reflect.mirror;
 
+import java.lang.reflect.Method;
+
 import io.l0neman.utils.stay.reflect.Reflect;
 import io.l0neman.utils.stay.reflect.mirror.throwable.MirrorException;
 
@@ -8,32 +10,27 @@ import io.l0neman.utils.stay.reflect.mirror.throwable.MirrorException;
  */
 public class MirrorMethod {
 
-  public Class<?> mClass;
-  public Object mObject;
-  public String mName;
-  public Class<?>[] mParameterTypes;
+  private Object mObject;
+  private final Method mMethod;
 
-  // for object's field.
-  public MirrorMethod(Class<?> mClass, Object mObject, String mName, Class<?>[] mParameterTypes) {
-    this.mClass = mClass;
+  // for object method.
+  public MirrorMethod(Object mObject, Method mMethod) {
     this.mObject = mObject;
-    this.mName = mName;
-    this.mParameterTypes = mParameterTypes;
+    this.mMethod = mMethod;
   }
 
-  // for class's static field.
-  public MirrorMethod(Class<?> mClass, String mName, Class<?>[] mParameterTypes) {
-    this.mClass = mClass;
-    this.mName = mName;
-    this.mParameterTypes = mParameterTypes;
+  // for static method.
+  public MirrorMethod(Method mMethod) {
+    this.mMethod = mMethod;
+  }
+
+  public void setObject(Object mObject) {
+    this.mObject = mObject;
   }
 
   public Object invoke(Object... args) throws MirrorException {
     try {
-      return Reflect.with(mObject != null ? mObject : mClass).invoker()
-          .method(mName)
-          .parameterType(mParameterTypes)
-          .invoke();
+      return Reflect.with(mMethod).targetObject(mObject).invoke(args);
     } catch (Exception e) {
       throw new MirrorException(e);
     }
