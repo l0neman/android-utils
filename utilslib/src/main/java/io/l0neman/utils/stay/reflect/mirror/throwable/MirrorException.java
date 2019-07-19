@@ -2,6 +2,8 @@ package io.l0neman.utils.stay.reflect.mirror.throwable;
 
 /**
  * Created by l0neman on 2019/07/06.
+ *
+ * Exception during mapping.
  */
 public class MirrorException extends Exception {
 
