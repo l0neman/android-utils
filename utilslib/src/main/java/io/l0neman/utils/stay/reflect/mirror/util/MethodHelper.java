@@ -3,7 +3,7 @@ package io.l0neman.utils.stay.reflect.mirror.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import io.l0neman.utils.stay.reflect.Reflect;
+import io.l0neman.utils.stay.reflect.mirror.Reflect;
 import io.l0neman.utils.stay.reflect.mirror.annoation.MethodParameterClasses;
 import io.l0neman.utils.stay.reflect.mirror.annoation.MethodParameterClassesOverload;
 import io.l0neman.utils.stay.reflect.mirror.annoation.MethodParameterClassesOverload2;

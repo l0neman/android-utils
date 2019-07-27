@@ -3,7 +3,6 @@ package io.l0neman.utils.stay.reflect.mirror;
 
 import java.lang.reflect.Field;
 
-import io.l0neman.utils.stay.reflect.Reflect;
 import io.l0neman.utils.stay.reflect.mirror.throwable.MirrorException;
 
 /**
@@ -56,7 +55,7 @@ public class MirrorField<T> {
    * @param value new value.
    * @throws MirrorException otherwise.
    */
-  public void set(Object value) throws MirrorException {
+  public void set(T value) throws MirrorException {
     try {
       Reflect.with(mField).targetObject(mObject).set(value);
     } catch (Reflect.ReflectException e) {

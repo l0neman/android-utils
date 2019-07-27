@@ -1,10 +1,11 @@
 package io.l0neman.utils.stay.reflect.mirror.util;
 
 
+import androidx.collection.ArrayMap;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,9 +13,9 @@ import java.util.Map;
  */
 public class MirrorClassInfo {
   private Class<?> mMirrorClassName;
-  private Map<String, Method> mMethodsInfo = new HashMap<>();
-  private Map<String, Field> mFieldsInfo = new HashMap<>();
-  private Map<String, Constructor> mConstructorInfo = new HashMap<>();
+  private Map<String, Method> mMethodsInfo = new ArrayMap<>();
+  private Map<String, Field> mFieldsInfo = new ArrayMap<>();
+  private Map<String, Constructor> mConstructorInfo = new ArrayMap<>();
 
   public void setTargetMirrorClass(Class<?> mMirrorClassName) {
     this.mMirrorClassName = mMirrorClassName;

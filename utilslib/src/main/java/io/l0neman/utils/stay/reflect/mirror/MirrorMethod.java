@@ -1,13 +1,13 @@
 package io.l0neman.utils.stay.reflect.mirror;
 
+import androidx.collection.ArrayMap;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
-import io.l0neman.pluginlib.util.Reflect;
-import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
-import io.l0neman.pluginlib.util.reflect.mirror.util.MethodHelper;
+import io.l0neman.utils.stay.reflect.mirror.throwable.MirrorException;
+import io.l0neman.utils.stay.reflect.mirror.util.MethodHelper;
 
 /**
  * Created by l0neman on 2019/07/06.
@@ -18,7 +18,7 @@ public class MirrorMethod<T> {
 
   private Object mObject;
   private Method mMethod;
-  private Map<String, Method> mOverloadMethodMap = new HashMap<>();
+  private Map<String, Method> mOverloadMethodMap = new ArrayMap<>();
 
   // for object method.
   public MirrorMethod(Object mObject, Method[] overloadMethod) {
