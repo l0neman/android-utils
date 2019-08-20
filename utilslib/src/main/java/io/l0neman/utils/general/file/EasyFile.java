@@ -2,7 +2,6 @@ package io.l0neman.utils.general.file;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * Created by l0neman on 2019/05/30.
@@ -70,7 +69,7 @@ public class EasyFile {
    * @throws EasyFileException other cases。
    */
   public static File createDir(File dir) throws EasyFileException {
-    return checkAndCreateDir(Objects.requireNonNull(dir));
+    return checkAndCreateDir(requireNonNull(dir));
   }
 
   /**
@@ -83,7 +82,7 @@ public class EasyFile {
    * @throws EasyFileException other cases。
    */
   public static File createFile(File file) throws EasyFileException {
-    return checkAndCreateFile(Objects.requireNonNull(file));
+    return checkAndCreateFile(requireNonNull(file));
   }
 
   /**
@@ -96,17 +95,23 @@ public class EasyFile {
    * @throws EasyFileException unexpected exception.
    */
   public static File deleteFile(File file) throws EasyFileException {
-    return checkAndRemove(Objects.requireNonNull(file));
+    return checkAndRemove(requireNonNull(file));
   }
 
   /**
    * Same as {@link #deleteFile(File)}
    */
   public static File deleteDir(File dir) throws EasyFileException {
-    return checkAndRemove(Objects.requireNonNull(dir));
+    return checkAndRemove(requireNonNull(dir));
   }
 
   // file utils:
+
+  private static <T> T requireNonNull(T obj) {
+    if (obj == null)
+      throw new NullPointerException();
+    return obj;
+  }
 
   private static File checkAndRemove(File file) throws EasyFileException {
     if (!file.exists()) {
@@ -133,6 +138,15 @@ public class EasyFile {
       for (File fi : files) {
         checkAndRemove(fi);
       }
+
+      try {
+        //noinspection StatementWithEmptyBody
+        if (file.delete()) {
+          // Log.d(TAG, "remove file ok: " + dirPath);
+        }
+      } catch (RuntimeException e) {
+        throw new EasyFileException("remove dir error", e);
+      }
     }
 
     return file;
@@ -144,7 +158,7 @@ public class EasyFile {
     }
 
     final File parentFile = file.getParentFile();
-    if (!parentFile.exists()) {
+    if (parentFile != null && !parentFile.exists()) {
       checkAndCreateDir(parentFile);
     }
 
@@ -155,7 +169,7 @@ public class EasyFile {
       }
     } catch (IOException e) {
       // Log.e(TAG, "create file: " + file + " error", e);
-      throw new EasyFileException("check file error", e);
+      throw new EasyFileException("create file error", e);
     }
     return file;
   }
@@ -172,9 +186,10 @@ public class EasyFile {
         // Log.d(TAG, "create dir ok: " + dirPath);
       }
     } catch (RuntimeException e) {
-      throw new EasyFileException("check dir error", e);
+      throw new EasyFileException("create dir error", e);
     }
 
     return dir;
   }
 }
+
