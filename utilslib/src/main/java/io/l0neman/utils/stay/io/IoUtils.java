@@ -17,7 +17,7 @@ import java.nio.channels.WritableByteChannel;
 /**
  * Created by l0neman on 2019/05/31.
  */
-public class IOUtils {
+public class IoUtils {
 
   public static String read(File file, String csName) throws IOException {
     Closer closer = Closer.create();

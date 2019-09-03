@@ -11,8 +11,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import io.l0neman.utils.stay.reflect.io.Closer;
-import io.l0neman.utils.stay.reflect.io.IOUtils;
+import io.l0neman.utils.general.io.Closer;
+import io.l0neman.utils.stay.io.IoUtils;
 
 /**
  * Created by l0neman on 2019/05/13.
@@ -56,7 +56,12 @@ public class ZipUtils {
           continue;
         }
 
-        final String entryFileName = EasyFile.makeFileName(outDir, zipEntry.getName());
+        final String name = zipEntry.getName();
+        if (name.contains("../")) {
+          throw new IllegalAccessError("Refuse to unzip file $" + name);
+        }
+
+        final String entryFileName = EasyFile.makeFileName(outDir, name);
         final File file = new File(entryFileName);
 
         // 不覆盖已存在文件。
@@ -65,7 +70,7 @@ public class ZipUtils {
         }
 
         File entryFile = EasyFile.createFile(file);
-        unzipEntry(zipFile, zipEntry.getName(), entryFile);
+        unzipEntry(zipFile, name, entryFile);
       }
     } catch (Exception e) {
       throw new ZipException("unzip error: " + e.getMessage());
@@ -80,7 +85,7 @@ public class ZipUtils {
     final InputStream zipIs = zip.getInputStream(entry);
     final FileOutputStream out = new FileOutputStream(outFile);
 
-    IOUtils.transfer(zipIs, out, true);
+    IoUtils.transfer(zipIs, out, true);
   }
 
   public static InputStream openEntryStream(ZipFile zip, String entryName)
@@ -123,7 +128,7 @@ public class ZipUtils {
         throw new ZipException("entry not exist: " + entryName);
       }
 
-      IOUtils.transfer(zipIs, out, true);
+      IoUtils.transfer(zipIs, out, true);
 
     } catch (IOException e) {
       throw new ZipException("unzip error: " + e.getMessage());
