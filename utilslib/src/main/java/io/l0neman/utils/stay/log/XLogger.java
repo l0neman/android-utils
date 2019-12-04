@@ -6,7 +6,6 @@ import android.util.Log;
  * Created by l0neman on 2019/06/29.
  */
 public class XLogger {
-
   private static final String MAIN_TAG = "X";
 
   // 是否开启附加栈信息。
@@ -31,7 +30,7 @@ public class XLogger {
   }
 
   private static String getTag(String tag) {
-    return MAIN_TAG + "_" + tag;
+    return MAIN_TAG + "#" + tag;
   }
 
   private static String stackInfo() {
@@ -71,34 +70,36 @@ public class XLogger {
     return -1;
   }
 
-  public static void i(String tag, String msg) {
+  public static void i(String tag, String format, Object... args) {
     if (PRINT) {
-      Log.i(getTag(tag), getLog(msg));
+      Log.i(getTag(tag), getLog(String.format(format, args)));
     }
   }
 
-  public static void i(String tag, String msg, Throwable tr) {
+  public static void i(String tag, Throwable tr, String format, Object... args) {
     if (PRINT) {
-      Log.i(getTag(tag), getLog(msg), tr);
+      Log.i(getTag(tag), getLog(String.format(format, args)), tr);
     }
   }
 
-  public static void d(String tag, String msg) {
+  public static void d(String tag, String format, Object... args) {
     if (PRINT) {
-      Log.d(getTag(tag), getLog(msg));
+      Log.d(getTag(tag), getLog(String.format(format, args)));
     }
   }
 
-  public static void d(String tag, String msg, Throwable tr) {
+  public static void d(String tag, Throwable tr, String format, Object... args) {
     if (PRINT) {
-      Log.d(getTag(tag), getLog(msg), tr);
+      Log.d(getTag(tag), getLog(String.format(format, args)), tr);
     }
   }
 
-  public static void dL(String tag, String log) {
+  public static void dL(String tag, String format, Object... args) {
     if (!PRINT) {
       return;
     }
+
+    String log = String.format(format, args);
 
     final int k = 3000;
     if (log.length() < k) {
@@ -122,15 +123,15 @@ public class XLogger {
     }
   }
 
-  public static void w(String tag, String msg) {
+  public static void w(String tag, String format, Object... args) {
     if (PRINT) {
-      Log.w(getTag(tag), getLog(msg));
+      Log.w(getTag(tag), getLog(String.format(format, args)));
     }
   }
 
-  public static void w(String tag, String msg, Throwable tr) {
+  public static void w(String tag, Throwable tr, String format, Object... args) {
     if (PRINT) {
-      Log.w(getTag(tag), getLog(msg), tr);
+      Log.w(getTag(tag), getLog(String.format(format, args)), tr);
     }
   }
 
@@ -140,15 +141,15 @@ public class XLogger {
     }
   }
 
-  public static void e(String tag, String msg) {
+  public static void e(String tag,String format, Object... args) {
     if (PRINT) {
-      Log.e(getTag(tag), getLog(msg));
+      Log.e(getTag(tag), getLog(String.format(format, args)));
     }
   }
 
-  public static void e(String tag, String msg, Throwable tr) {
+  public static void e(String tag, Throwable tr, String format, Object... args) {
     if (PRINT) {
-      Log.e(getTag(tag), getLog(msg), tr);
+      Log.e(getTag(tag), getLog(String.format(format, args)), tr);
     }
   }
 
