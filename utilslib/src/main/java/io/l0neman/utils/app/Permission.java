@@ -3,7 +3,6 @@ package io.l0neman.utils.app;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -19,82 +18,79 @@ import java.util.Set;
 
 public final class Permission {
 
-  /* Permission request code */
-  private static final int PERMISSION_REQUEST_CODE = Short.MAX_VALUE;
-
   private List<String> mRequestPermissions = new ArrayList<>();
   private Set<String> mGrantedPermissions = new HashSet<>();
 
   private final SingleCallback mCallBack;
 
-  private Permission(@NonNull SingleCallback callBack) {
+  private Permission(@androidx.annotation.NonNull SingleCallback callBack) {
     this.mCallBack = callBack;
   }
 
-  public static Permission newInstance(@NonNull MultiCallBack callBack) {
+  public static Permission newInstance(@androidx.annotation.NonNull MultiCallBack callBack) {
     return new Permission(callBack);
   }
 
-  public static Permission newInstance(@NonNull SingleCallback callback) {
+  public static Permission newInstance(@androidx.annotation.NonNull SingleCallback callback) {
     return new Permission(callback);
   }
 
   public interface SingleCallback {
-    void onGranted(String permission);
+    void onGranted(int requestCode, String permission);
 
-    void onDenied(String permission);
+    void onDenied(int requestCode, String permission);
 
-    void onRationale(String permission);
+    void onRationale(int requestCode, String permission);
   }
 
   public interface MultiCallBack extends SingleCallback {
-    void onGrantedAll();
+    void onGrantedAll(int requestCode);
 
-    void onGrantedPart(Set<String> grantedPermissions);
+    void onGrantedPart(int requestCode, Set<String> grantedPermissions);
   }
 
   public static class SingleAdapter implements SingleCallback {
 
-    @Override public void onGranted(String permission) {}
+    @Override public void onGranted(int requestCode, String permission) {}
 
-    @Override public void onDenied(String permission) {}
+    @Override public void onDenied(int requestCode, String permission) {}
 
-    @Override public void onRationale(String permission) {}
+    @Override public void onRationale(int requestCode, String permission) {}
   }
 
   public static class MultiAdapter implements MultiCallBack {
 
-    @Override public void onGranted(String permission) {}
+    @Override public void onGranted(int requestCode, String permission) {}
 
-    @Override public void onDenied(String permission) {}
+    @Override public void onDenied(int requestCode, String permission) {}
 
-    @Override public void onRationale(String permission) {}
+    @Override public void onRationale(int requestCode, String permission) {}
 
-    @Override public void onGrantedAll() {}
+    @Override public void onGrantedAll(int requestCode) {}
 
-    @Override public void onGrantedPart(Set<String> grantedPermissions) {}
+    @Override public void onGrantedPart(int requestCode, Set<String> grantedPermissions) {}
   }
 
   /**
    * @param ignoreRationale 是否忽略权限解释
    */
-  public void checkAndRequest(Activity activity, boolean ignoreRationale,
-                              @NonNull String permission) {
+  public void checkAndRequest(Activity activity, int requestCode, boolean ignoreRationale,
+                              @androidx.annotation.NonNull String permission) {
     mRequestPermissions.clear();
     mGrantedPermissions.clear();
 
     if (mCallBack instanceof MultiCallBack) {
-      checkAndRequestMulti(activity, ignoreRationale, new String[]{permission});
+      checkAndRequestMulti(activity, requestCode, ignoreRationale, new String[]{permission});
     } else {
-      checkAndRequestSingle(activity, ignoreRationale, permission);
+      checkAndRequestSingle(activity, requestCode, ignoreRationale, permission);
     }
   }
 
   /**
    * like {@link #checkAndRequest}
    */
-  public void checkAndRequest(Activity activity, boolean ignoreRationale,
-                              @NonNull String... permissions) {
+  public void checkAndRequest(Activity activity, int requestCode, boolean ignoreRationale,
+                              @androidx.annotation.NonNull String... permissions) {
     if (permissions.length == 0) {
       throw new AssertionError("no permissions");
     }
@@ -103,98 +99,94 @@ public final class Permission {
     mGrantedPermissions.clear();
 
     if (mCallBack instanceof MultiCallBack) {
-      checkAndRequestMulti(activity, ignoreRationale, permissions);
+      checkAndRequestMulti(activity, requestCode, ignoreRationale, permissions);
     } else {
-      checkAndRequestSingle(activity, ignoreRationale, permissions[0]);
+      checkAndRequestSingle(activity, requestCode, ignoreRationale, permissions[0]);
     }
   }
 
-  private void checkAndRequestSingle(Activity activity, boolean ignoreRationale,
+  private void checkAndRequestSingle(Activity activity, int requestCode, boolean ignoreRationale,
                                      String permission) {
     if (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_DENIED) {
       if (!ignoreRationale && ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
-        mCallBack.onRationale(permission);
+        mCallBack.onRationale(requestCode, permission);
         return;
       }
 
       mRequestPermissions.add(permission);
     } else {
-      mCallBack.onGranted(permission);
+      mCallBack.onGranted(requestCode, permission);
     }
 
     if (!mRequestPermissions.isEmpty()) {
       ActivityCompat.requestPermissions(
-          activity, new String[]{mRequestPermissions.get(0)}, PERMISSION_REQUEST_CODE
+          activity, new String[]{mRequestPermissions.get(0)}, requestCode
       );
     }
   }
 
-  private void checkAndRequestMulti(Activity activity, boolean ignoreRationale,
+  private void checkAndRequestMulti(Activity activity, int requestCode, boolean ignoreRationale,
                                     String[] permissions) {
     for (final String permission : permissions) {
       if (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_DENIED) {
         if (!ignoreRationale && ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
-          mCallBack.onRationale(permission);
+          mCallBack.onRationale(requestCode, permission);
           mGrantedPermissions.add(permission);
           return;
         }
 
         mRequestPermissions.add(permission);
       } else {
-        mCallBack.onGranted(permission);
+        mCallBack.onGranted(requestCode, permission);
       }
     }
 
     if (!mRequestPermissions.isEmpty()) {
       ActivityCompat.requestPermissions(
-          activity, mRequestPermissions.toArray(new String[0]), PERMISSION_REQUEST_CODE
+          activity, mRequestPermissions.toArray(new String[0]), requestCode
       );
     } else {
-      ((MultiCallBack) mCallBack).onGrantedAll();
+      ((MultiCallBack) mCallBack).onGrantedAll(requestCode);
     }
   }
 
   public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-    if (requestCode != PERMISSION_REQUEST_CODE) {
-      return;
-    }
-
     if (permissions.length == 0 || grantResults.length != permissions.length) {
       return;
     }
 
     if (mCallBack instanceof MultiCallBack) {
-      handleMultiPermissionResult(permissions, grantResults);
+      handleMultiPermissionResult(requestCode, permissions, grantResults);
     } else {
-      handleSinglePermissionResult(permissions[0], grantResults[0]);
+      handleSinglePermissionResult(requestCode, permissions[0], grantResults[0]);
     }
   }
 
-  private void handleMultiPermissionResult(String[] permissions, int[] grantResults) {
+  private void handleMultiPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
     boolean isAllGranted = true;
     final MultiCallBack callBack = (MultiCallBack) mCallBack;
     for (int i = 0; i < permissions.length; i++) {
       if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-        callBack.onGranted(permissions[i]);
+        callBack.onGranted(requestCode, permissions[i]);
       } else {
         isAllGranted = false;
-        callBack.onDenied(permissions[i]);
+        callBack.onDenied(requestCode, permissions[i]);
       }
     }
 
     if (isAllGranted) {
-      callBack.onGrantedAll();
+      callBack.onGrantedAll(requestCode);
     } else {
-      callBack.onGrantedPart(mGrantedPermissions);
+      callBack.onGrantedPart(requestCode, mGrantedPermissions);
     }
   }
 
-  private void handleSinglePermissionResult(String permission, int grantResults) {
+  private void handleSinglePermissionResult(int requestCode, String permission, int grantResults) {
     if (grantResults == PackageManager.PERMISSION_GRANTED) {
-      mCallBack.onGranted(permission);
+      mCallBack.onGranted(requestCode, permission);
       mGrantedPermissions.add(permission);
     } else {
-      mCallBack.onDenied(permission);
+      mCallBack.onDenied(requestCode, permission);
     }
   }
 }

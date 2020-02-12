@@ -101,7 +101,7 @@ public class IoUtils {
     Closer closer = Closer.create();
     try {
       FileChannel in = closer.register(new FileInputStream(src).getChannel());
-      FileChannel out = closer.register(new FileInputStream(dest).getChannel());
+      FileChannel out = closer.register(new FileOutputStream(dest).getChannel());
 
       in.transferTo(0, in.size(), out);
     } finally {
