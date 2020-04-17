@@ -39,14 +39,14 @@ String targetClassName = "io.l0neman.utils.general.reflect.Reflect$ReflectTarget
 
 ```java
 // start with a class.
-reflectTarget = Reflect.with(ReflectTarget.class).creator()
+reflectTarget = Reflect.with(ReflectTarget.class).constructor()
     .parameterTypes(String.class)
     .create("hello");
 ```
 
 ```java
 // start with the class name.
-reflectTarget = Reflect.with(targetClassName).creator()
+reflectTarget = Reflect.with(targetClassName).constructor()
     .parameterTypes(String.class)
     .create("hello");
 ```
@@ -61,18 +61,18 @@ reflectTarget = Reflect.with(constructor).create("hello");
 
 ```java
 // call object method.
-String result = Reflect.with(reflectTarget).invoker()
+String result = Reflect.with(reflectTarget)
     .method("strMethod0")
-    .paramsType(int.class)
+    .parameterTypes(int.class)
     .invoke(1);
 ```
 
 ```java
 // call class method.
-result = Reflect.with(ReflectTarget.class).invoker()
+result = Reflect.with(ReflectTarget.class)
     .method("strMethod0")
     .targetObject(reflectTarget)
-    .paramsType(int.class, int.class)
+    .parameterTypes(int.class, int.class)
     .invoke(1, 2);
 ```
 
@@ -81,7 +81,7 @@ result = Reflect.with(ReflectTarget.class).invoker()
 final Method strMethod1 = ReflectTarget.class.getDeclaredMethod("strMethod1", int.class);
 
 result = Reflect.with(strMethod1)
-    .paramsType(int.class, int.class)
+    .parameterTypes(int.class, int.class)
     .invoke(1, 2);
 ```
 
@@ -89,28 +89,28 @@ result = Reflect.with(strMethod1)
 
 ```java
 // set object field.
-Reflect.with(reflectTarget).injector()
+Reflect.with(reflectTarget)
     .field("strField1")
     .set("hello1");
 ```
 
 ```java
 // set class field.
-Reflect.with(Reflect.class).injector()
+Reflect.with(Reflect.class)
     .field("strField0")
     .set("hello0");
 ```
 
 ```java
 // get object field.
-String strField = Reflect.with(reflectTarget).injector()
+String strField = Reflect.with(reflectTarget)
     .field("strField1")
     .get();
 ```
 
 ```java
 // get class field.
-strField = Reflect.with(ReflectTarget.class).injector()
+strField = Reflect.with(ReflectTarget.class)
     .field("strField0")
     .get();
 ```    

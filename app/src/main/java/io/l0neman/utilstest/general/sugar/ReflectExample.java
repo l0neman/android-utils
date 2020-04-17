@@ -35,72 +35,72 @@ public class ReflectExample {
   public void test() throws Exception {
     String targetClassName = "io.l0neman.utils.general.reflect.Reflect$ReflectTarget";
     ReflectTarget reflectTarget;
-    // 1. creator - 对象创建。
+// 1. creator - 对象创建。
 
-    // start with a class.
-    reflectTarget = Reflect.with(ReflectTarget.class).creator()
+// start with a class.
+    reflectTarget = Reflect.with(ReflectTarget.class).constructor()
         .parameterTypes(String.class)
         .create("hello");
 
-    // start with the class name.
-    reflectTarget = Reflect.with(targetClassName).creator()
+// start with the class name.
+    reflectTarget = Reflect.with(targetClassName).constructor()
         .parameterTypes(String.class)
         .create("hello");
 
-    // wrap java.lang.reflect.Constructor.
+// wrap java.lang.reflect.Constructor.
     Constructor<?> constructor = ReflectTarget.class.getConstructor(String.class);
     reflectTarget = Reflect.with(constructor).create("hello");
 
 
-    // 2. invoker - 方法调用。
-    // call object method.
-    String result = Reflect.with(reflectTarget).invoker()
+// 2. invoker - 方法调用。
+// call object method.
+    String result = Reflect.with(reflectTarget)
         .method("strMethod0")
-        .paramsType(int.class)
+        .parameterTypes(int.class)
         .invoke(1);
 
-    // call class method.
-    result = Reflect.with(ReflectTarget.class).invoker()
+// call class method.
+    result = Reflect.with(ReflectTarget.class)
         .method("strMethod0")
         .targetObject(reflectTarget)
-        .paramsType(int.class, int.class)
+        .parameterTypes(int.class, int.class)
         .invoke(1, 2);
 
-    // wrap java.lang.reflect.Method.
+// wrap java.lang.reflect.Method.
     final Method strMethod1 = ReflectTarget.class.getDeclaredMethod("strMethod1", int.class);
 
     result = Reflect.with(strMethod1)
-        .paramsType(int.class, int.class)
+        .parameterTypes(int.class, int.class)
         .invoke(1, 2);
 
-    // 3. injector - 成员读写。
-    // set object field.
-    Reflect.with(reflectTarget).injector()
+// 3. injector - 成员读写。
+// set object field.
+    Reflect.with(reflectTarget)
         .field("strField1")
         .set("hello1");
 
-    // set class field.
-    Reflect.with(Reflect.class).injector()
+// set class field.
+    Reflect.with(Reflect.class)
         .field("strField0")
         .set("hello0");
 
-    // get object field.
-    String strField = Reflect.with(reflectTarget).injector()
+// get object field.
+    String strField = Reflect.with(reflectTarget)
         .field("strField1")
         .get();
 
-    // get class field.
-    strField = Reflect.with(ReflectTarget.class).injector()
+// get class field.
+    strField = Reflect.with(ReflectTarget.class)
         .field("strField0")
         .get();
 
-    // wrap java.lang.reflect.Field.
+// wrap java.lang.reflect.Field.
     Field strField1 = ReflectTarget.class.getDeclaredField("strField1");
 
     Reflect.with(strField1).targetObject(reflectTarget).set("hello");
     Reflect.with(strField1).targetObject(reflectTarget).get();
 
-    // 4. class for name.
+// 4. class for name.
     final Class<?> targetClass = Reflect.with(targetClassName).getClazz();
   }
 }
