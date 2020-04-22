@@ -45,7 +45,9 @@ public class Reflect {
   }
 
   private static void checkNull(Object obj, String tag) {
-    throw new NullPointerException(tag + " is null.");
+    if (obj == null) {
+      throw new NullPointerException(tag + " is null.");
+    }
   }
 
   public static Reflect with(String className) {
