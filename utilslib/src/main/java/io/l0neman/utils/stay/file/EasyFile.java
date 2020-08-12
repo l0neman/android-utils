@@ -158,7 +158,7 @@ public class EasyFile {
     }
 
     final File parentFile = file.getParentFile();
-    if (!parentFile.exists()) {
+    if (parentFile != null && !parentFile.exists()) {
       checkAndCreateDir(parentFile);
     }
 

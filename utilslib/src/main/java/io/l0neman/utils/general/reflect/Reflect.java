@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  *
  * @see <a href="l0neman - Reflect">https://github.com/l0neman/MyPublicTools/blob/master/utilslib/src/main/java/io/l0neman/utils/general/reflect/desc_reflect_utils.md</a>
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"unused", "ConstantConditions"})
 public class Reflect {
   private static ThreadLocal<Reflect> sThreadState =
       new ThreadLocal<Reflect>() {
@@ -27,7 +27,8 @@ public class Reflect {
     Object mObject;
 
     protected final Class<?> getClazz() {
-      if (mClass != null) { return mClass; }
+      if (mClass != null)
+        return mClass;
 
       return mObject != null ? mObject.getClass() : null;
     }
@@ -45,9 +46,8 @@ public class Reflect {
   }
 
   private static void checkNull(Object obj, String tag) {
-    if (obj == null) {
+    if (obj == null)
       throw new NullPointerException(tag + " is null.");
-    }
   }
 
   public static Reflect with(String className) {
@@ -148,10 +148,9 @@ public class Reflect {
 
     public <T> T create(Object... args) throws ReflectException {
       try {
-        if (constructor != null) {
+        if (constructor != null)
           // noinspection unchecked
           return (T) constructor.newInstance(args);
-        }
 
         if (constructorParameterTypes == null) {
           constructorParameterTypes = getTypesFromObjects();
@@ -211,9 +210,8 @@ public class Reflect {
 
     public Field getField() throws ReflectException {
       try {
-        if (mField != null) {
+        if (mField != null)
           return mField;
-        }
 
         Field field = getDeclaredFieldFromClassTree(mClass);
         field.setAccessible(true);
@@ -234,10 +232,9 @@ public class Reflect {
 
     public <T> T get() throws ReflectException {
       try {
-        if (mField != null) {
+        if (mField != null)
           // noinspection unchecked: throw cast exception.
           return (T) mField.get(mObject);
-        }
 
         Field field = getDeclaredFieldFromClassTree(mClass);
         field.setAccessible(true);
@@ -254,9 +251,9 @@ public class Reflect {
         return clazz.getDeclaredField(mFieldName);
       } catch (NoSuchFieldException e) {
         Class<?> parent = clazz.getSuperclass();
-        if (parent != null && parent != Object.class) {
+
+        if (parent != null && parent != Object.class)
           return getDeclaredFieldFromClassTree(parent);
-        }
       }
 
       throw new Exception("not found field: " + mFieldName + " from class: " + clazz);
@@ -294,11 +291,10 @@ public class Reflect {
 
     public Method getMethod() throws ReflectException {
       try {
-        if (mMethod != null) {
+        if (mMethod != null)
           return mMethod;
-        }
 
-        Method targetMethod = getDeclaredMethodFromClassTree(mClass, null);
+        Method targetMethod = getDeclaredMethodFromClassTree(mClass);
         targetMethod.setAccessible(true);
 
         return targetMethod;
@@ -317,10 +313,9 @@ public class Reflect {
 
     public <T> T invoke(Object... args) throws ReflectException {
       try {
-        if (mMethod != null) {
+        if (mMethod != null)
           // noinspection unchecked: throw cast exception.
           return (T) mMethod.invoke(mObject, args);
-        }
 
         Method targetMethod = getDeclaredMethodFromClassTree(mClass, args);
         targetMethod.setAccessible(true);
@@ -332,14 +327,9 @@ public class Reflect {
       }
     }
 
-    private Method getDeclaredMethodFromClassTree(Class<?> clazz, Object args) throws Exception {
-      if (mParameterTypes == null) {
-        if (args != null) {
-          mParameterTypes = getTypesFromObjects(args);
-        }
-
-        throw new IllegalArgumentException("parameterTypes and args are both null.");
-      }
+    private Method getDeclaredMethodFromClassTree(Class<?> clazz, Object... args) throws Exception {
+      if (mParameterTypes == null)
+        mParameterTypes = getTypesFromObjects(args);
 
       try {
         return clazz.getDeclaredMethod(mMethodName, mParameterTypes);
@@ -388,7 +378,8 @@ public class Reflect {
   }
 
   private static boolean isEMUI() {
-    if (Build.DISPLAY.toUpperCase().startsWith("EMUI")) { return true; }
+    if (Build.DISPLAY.toUpperCase().startsWith("EMUI"))
+      return true;
 
     String property = getEmuiSystemProperties();
     return property != null && property.contains("EmotionUI");
@@ -397,18 +388,17 @@ public class Reflect {
   public static void bypassHiddenAPIEnforcementPolicyIfNeeded() {
     if (sBypassedP) { return; }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
       try {
         Class<?> clazz = getVMRuntimeClass();
         Method getRuntime = getDeclaredMethod(clazz, "getRuntime", new Class[0]);
         Method setHiddenApiExemptions = getDeclaredMethod(clazz, "setHiddenApiExemptions",
             new Class[]{String[].class});
-        if (getRuntime == null || setHiddenApiExemptions == null) {
+        if (getRuntime == null || setHiddenApiExemptions == null)
           throw new NullPointerException("keys are null.");
-        }
 
         Object runtime = getRuntime.invoke(null);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && isEMUI()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && isEMUI())
           setHiddenApiExemptions.invoke(runtime, new Object[]{
               new String[]{
                   "Landroid/",
@@ -419,7 +409,7 @@ public class Reflect {
                   "Lhuawei/"
               }
           });
-        } else {
+        else
           setHiddenApiExemptions.invoke(runtime, new Object[]{
               new String[]{
                   "Landroid/",
@@ -429,17 +419,16 @@ public class Reflect {
                   "Llibcore/io/"
               }
           });
-        }
       } catch (Throwable e) {
         e.printStackTrace();
       }
-    }
 
     sBypassedP = true;
   }
 
   private static Class<?>[] getTypesFromObjects(Object... values) throws Exception {
-    if (values == null) { return new Class[0]; }
+    if (values == null || values.length == 0)
+      return new Class[0];
 
     Class<?>[] result = new Class[values.length];
 
