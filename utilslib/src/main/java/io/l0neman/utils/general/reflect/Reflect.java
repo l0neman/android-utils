@@ -9,18 +9,11 @@ import java.lang.reflect.Method;
 /**
  * Created by l0neman on 2019/06/23.
  *
- * @see <a href="l0neman - Reflect">https://github.com/l0neman/MyPublicTools/blob/master/utilslib/src/main/java/io/l0neman/utils/general/reflect/desc_reflect_utils.md</a>
+ * @see <a href="l0neman - Reflect">https://github.com/l0neman/android-utils/blob/master/utilslib/src/main/java/io/l0neman/utils/general/reflect/desc_reflect_utils.md</a>
  */
-@SuppressWarnings({"unused", "ConstantConditions"})
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class Reflect {
-  private static ThreadLocal<Reflect> sThreadState =
-      new ThreadLocal<Reflect>() {
-        @Override protected Reflect initialValue() {
-          return new Reflect();
-        }
-      };
-
-  private Reflector reflector = new Reflector();
+  private final Reflector reflector = new Reflector();
 
   public static class Reflector {
     Class<?> mClass;
@@ -61,8 +54,7 @@ public class Reflect {
 
   public static Reflect with(Object object) {
     checkNull(object, "object");
-    final Reflect reflect = sThreadState.get();
-    reflect.clean();
+    final Reflect reflect = new Reflect();
     reflect.reflector.mClass = object.getClass();
     reflect.reflector.mObject = object;
     return reflect;
@@ -70,8 +62,7 @@ public class Reflect {
 
   public static Reflect with(Class<?> clazz) {
     checkNull(clazz, "class");
-    final Reflect reflect = sThreadState.get();
-    reflect.clean();
+    final Reflect reflect = new Reflect();
     reflect.reflector.mClass = clazz;
     return reflect;
   }
@@ -112,12 +103,6 @@ public class Reflect {
     creator.mClass = reflector.mClass;
     creator.mObject = reflector.mObject;
     return creator;
-  }
-
-  // clean temp
-  private void clean() {
-    reflector.mClass = null;
-    reflector.mObject = null;
   }
 
   public static final class Creator extends Reflector {
@@ -222,7 +207,7 @@ public class Reflect {
       }
     }
 
-    public <T> T getQuietly() {
+    public <t> t getQuietly() {
       try {
         return get();
       } catch (ReflectException e) {
@@ -303,7 +288,7 @@ public class Reflect {
       }
     }
 
-    public <T> T invokeQuietly(Object... params) {
+    public <t> t invokeQuietly(Object... params) {
       try {
         return invoke(params);
       } catch (ReflectException e) {
@@ -359,7 +344,7 @@ public class Reflect {
   private static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>[] parameterTypes) {
     try {
       Method getMethodMethod = Class.class.getDeclaredMethod("getDeclaredMethod",
-          String.class, Class[].class);
+              String.class, Class[].class);
       return (Method) getMethodMethod.invoke(clazz, name, parameterTypes);
     } catch (Exception e) {
       return null;
@@ -369,7 +354,7 @@ public class Reflect {
   private static String getEmuiSystemProperties() {
     try {
       return Reflect.with("android.os.SystemProperties").method("get")
-          .parameterTypes(String.class).invoke("ro.build.version.emui");
+              .parameterTypes(String.class).invoke("ro.build.version.emui");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -388,46 +373,49 @@ public class Reflect {
   public static void bypassHiddenAPIEnforcementPolicyIfNeeded() {
     if (sBypassedP) { return; }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       try {
         Class<?> clazz = getVMRuntimeClass();
         Method getRuntime = getDeclaredMethod(clazz, "getRuntime", new Class[0]);
         Method setHiddenApiExemptions = getDeclaredMethod(clazz, "setHiddenApiExemptions",
-            new Class[]{String[].class});
-        if (getRuntime == null || setHiddenApiExemptions == null)
+                new Class[]{String[].class});
+        if (getRuntime == null || setHiddenApiExemptions == null) {
           throw new NullPointerException("keys are null.");
+        }
 
         Object runtime = getRuntime.invoke(null);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && isEMUI())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && isEMUI()) {
           setHiddenApiExemptions.invoke(runtime, new Object[]{
-              new String[]{
-                  "Landroid/",
-                  "Lcom/android/",
-                  "Ljava/lang/",
-                  "Ldalvik/system/",
-                  "Llibcore/io/",
-                  "Lhuawei/"
-              }
+                  new String[]{
+                          "Landroid/",
+                          "Lcom/android/",
+                          "Ljava/lang/",
+                          "Ldalvik/system/",
+                          "Llibcore/io/",
+                          "Lhuawei/"
+                  }
           });
-        else
+        } else {
           setHiddenApiExemptions.invoke(runtime, new Object[]{
-              new String[]{
-                  "Landroid/",
-                  "Lcom/android/",
-                  "Ljava/lang/",
-                  "Ldalvik/system/",
-                  "Llibcore/io/"
-              }
+                  new String[]{
+                          "Landroid/",
+                          "Lcom/android/",
+                          "Ljava/lang/",
+                          "Ldalvik/system/",
+                          "Llibcore/io/"
+                  }
           });
+        }
       } catch (Throwable e) {
         e.printStackTrace();
       }
+    }
 
     sBypassedP = true;
   }
 
   private static Class<?>[] getTypesFromObjects(Object... values) throws Exception {
-    if (values == null || values.length == 0)
+    if (values.length == 0)
       return new Class[0];
 
     Class<?>[] result = new Class[values.length];
