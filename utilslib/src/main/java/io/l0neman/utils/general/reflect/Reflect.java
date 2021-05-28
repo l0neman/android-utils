@@ -1,4 +1,4 @@
-package io.l0neman.utils.general.reflect;
+package io.hexman.xiconchanger.util;
 
 import android.os.Build;
 
@@ -9,17 +9,10 @@ import java.lang.reflect.Method;
 /**
  * Created by l0neman on 2019/06/23.
  *
- * @see <a href="l0neman - Reflect">https://github.com/l0neman/MyPublicTools/blob/master/utilslib/src/main/java/io/l0neman/utils/general/reflect/desc_reflect_utils.md</a>
+ * @see <a href="l0neman - Reflect">https://github.com/l0neman/android-utils/blob/master/utilslib/src/main/java/io/l0neman/utils/general/reflect/desc_reflect_utils.md</a>
  */
-@SuppressWarnings({"unused", "ConstantConditions"})
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class Reflect {
-  private static ThreadLocal<Reflect> sThreadState =
-      new ThreadLocal<Reflect>() {
-        @Override protected Reflect initialValue() {
-          return new Reflect();
-        }
-      };
-
   private Reflector reflector = new Reflector();
 
   public static class Reflector {
@@ -61,8 +54,7 @@ public class Reflect {
 
   public static Reflect with(Object object) {
     checkNull(object, "object");
-    final Reflect reflect = sThreadState.get();
-    reflect.clean();
+    final Reflect reflect = new Reflect();
     reflect.reflector.mClass = object.getClass();
     reflect.reflector.mObject = object;
     return reflect;
@@ -70,8 +62,7 @@ public class Reflect {
 
   public static Reflect with(Class<?> clazz) {
     checkNull(clazz, "class");
-    final Reflect reflect = sThreadState.get();
-    reflect.clean();
+    final Reflect reflect = new Reflect();
     reflect.reflector.mClass = clazz;
     return reflect;
   }
@@ -114,12 +105,6 @@ public class Reflect {
     return creator;
   }
 
-  // clean temp
-  private void clean() {
-    reflector.mClass = null;
-    reflector.mObject = null;
-  }
-
   public static final class Creator extends Reflector {
     private Constructor<?> constructor;
     private Class<?>[] constructorParameterTypes;
@@ -146,7 +131,7 @@ public class Reflect {
       }
     }
 
-    public <T> T create(Object... args) throws ReflectException {
+    public <t> t create(Object... args) throws ReflectException {
       try {
         if (constructor != null)
           // noinspection unchecked
@@ -160,7 +145,7 @@ public class Reflect {
         final Constructor<?> constructor = getClazz().getConstructor(constructorParameterTypes);
 
         // noinspection unchecked
-        return (T) constructor.newInstance(args);
+        return (t) constructor.newInstance(args);
       } catch (Exception e) {
         throw new ReflectException("#create", e);
       }
@@ -222,7 +207,7 @@ public class Reflect {
       }
     }
 
-    public <T> T getQuietly() {
+    public <t> t getQuietly() {
       try {
         return get();
       } catch (ReflectException e) {
@@ -230,7 +215,7 @@ public class Reflect {
       }
     }
 
-    public <T> T get() throws ReflectException {
+    public <t> t get() throws ReflectException {
       try {
         if (mField != null)
           // noinspection unchecked: throw cast exception.
@@ -240,7 +225,7 @@ public class Reflect {
         field.setAccessible(true);
 
         // noinspection unchecked: throw cast exception.
-        return (T) field.get(mObject);
+        return (t) field.get(mObject);
       } catch (Exception e) {
         throw new ReflectException("#get", e);
       }
@@ -303,15 +288,15 @@ public class Reflect {
       }
     }
 
-    public <T> T invokeQuietly(Object... params) {
+    public <t> t invokeQuietly(Object... params) {
       try {
-        return invoke(params);
+          return invoke(params);
       } catch (ReflectException e) {
         throw new RuntimeException(e);
       }
     }
 
-    public <T> T invoke(Object... args) throws ReflectException {
+    public <t> t invoke(Object... args) throws ReflectException {
       try {
         if (mMethod != null)
           // noinspection unchecked: throw cast exception.
@@ -321,7 +306,7 @@ public class Reflect {
         targetMethod.setAccessible(true);
 
         // noinspection unchecked: throw cast exception.
-        return (T) targetMethod.invoke(mObject, args);
+        return (t) targetMethod.invoke(mObject, args);
       } catch (Exception e) {
         throw new ReflectException("#invoke", e);
       }
@@ -388,17 +373,18 @@ public class Reflect {
   public static void bypassHiddenAPIEnforcementPolicyIfNeeded() {
     if (sBypassedP) { return; }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       try {
         Class<?> clazz = getVMRuntimeClass();
         Method getRuntime = getDeclaredMethod(clazz, "getRuntime", new Class[0]);
         Method setHiddenApiExemptions = getDeclaredMethod(clazz, "setHiddenApiExemptions",
             new Class[]{String[].class});
-        if (getRuntime == null || setHiddenApiExemptions == null)
+        if (getRuntime == null || setHiddenApiExemptions == null) {
           throw new NullPointerException("keys are null.");
+        }
 
         Object runtime = getRuntime.invoke(null);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && isEMUI())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && isEMUI()) {
           setHiddenApiExemptions.invoke(runtime, new Object[]{
               new String[]{
                   "Landroid/",
@@ -409,7 +395,7 @@ public class Reflect {
                   "Lhuawei/"
               }
           });
-        else
+        } else {
           setHiddenApiExemptions.invoke(runtime, new Object[]{
               new String[]{
                   "Landroid/",
@@ -419,15 +405,17 @@ public class Reflect {
                   "Llibcore/io/"
               }
           });
+        }
       } catch (Throwable e) {
         e.printStackTrace();
       }
+    }
 
     sBypassedP = true;
   }
 
   private static Class<?>[] getTypesFromObjects(Object... values) throws Exception {
-    if (values == null || values.length == 0)
+    if (values.length == 0)
       return new Class[0];
 
     Class<?>[] result = new Class[values.length];
